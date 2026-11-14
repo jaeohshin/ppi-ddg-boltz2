@@ -44,6 +44,64 @@ Everything lines up except Discovery Studio, whose released predictions are
 (+0.390, RMSE 3.073), so the published figures are computed on the negated values. Which
 side carries the sign error is not something these files can settle.
 
+## Result: the block-penalised ridge beats it
+
+The reader described in the parent directory — a ridge over frozen Boltz-2 blocks with one
+penalty scale each, fitted on the 2-to-3-mutation training rows — scores on 586 of the 595
+blind mutations (66 of 68 complexes; nine rows had no feature row available).
+
+| method | Pearson | 95% CI | Spearman | RMSE | MAE |
+|---|---|---|---|---|---|
+| **Boltz block ridge** | **+0.868** | [+0.771, +0.911] | **+0.815** | **1.408** | 1.094 |
+| mmCSM-PPI | +0.687 | [+0.456, +0.804] | +0.638 | 2.059 | 1.507 |
+| FoldX | +0.395 | [+0.234, +0.518] | +0.370 | 5.277 | 4.128 |
+| Discovery Studio | −0.390 | [−0.515, −0.262] | −0.419 | 5.575 | 4.274 |
+
+Paired against mmCSM-PPI on the same rows, bootstrapping whole complexes:
+
+| | difference | 95% CI | complexes |
+|---|---|---|---|
+| Pearson | **+0.166** | [+0.065, +0.356] | 66 |
+| Spearman | **+0.164** | [+0.056, +0.331] | 66 |
+
+Both intervals clear zero. The error falls by 31%, from 2.06 to 1.41 kcal/mol.
+
+On the 36 ZEMu-set rows that overlap: ridge +0.877 / 1.069 against mmCSM-PPI's +0.732 /
+1.730 and ZEMu's +0.636 / 2.134, though ten complexes make that interval wide.
+
+Reproduce it with the shipped predictions:
+
+```bash
+python compare.py --release data/release \
+    --predictions data/predictions_boltz_block_ridge.csv --name "Boltz block ridge"
+```
+
+### A trained network does not beat the ridge here either
+
+The same features, the same folds, the same training rows, with the published
+architecture's shared-head difference and an MSE on ΔΔG:
+
+| model | Spearman | Pearson | RMSE |
+|---|---|---|---|
+| **Boltz block ridge** | **0.815** | **0.868** | **1.408** |
+| neural head, mean of 3 seeds | 0.770 | 0.823 | 1.632 |
+| mmCSM-PPI | 0.650 | 0.702 | 2.035 |
+
+Network minus ridge: ΔSpearman −0.045 [−0.115, +0.006]. This is the third cohort in which
+a closed-form reader of these representations is not beaten by a trained head on the same
+input — after SKEMPI single-point mutations under both the published and the
+homology-controlled splits.
+
+### What this result does not claim
+
+- 586 of 595 test rows and 1,231 of the 1,340 training rows were usable; nine test rows and
+  99 forward training rows had no feature row. Most of the training shortfall is 1KBH.
+- **516 of the test rows share a PDB entry with the training set.** That is the paper's own
+  mutation-count split, and mmCSM-PPI trained under the same condition, so the comparison is
+  like for like — but neither number is a test of generalisation to a new complex.
+- Overlap between these complexes and Boltz-2's pretraining was not audited.
+- This benchmark had been looked at before the run, so it is not a fully blind confirmation.
+
 ## One thing to know before claiming a win
 
 The blind set is separated from the training set **by mutation count** — two or three
@@ -102,6 +160,8 @@ forgotten.
 
 | | why it was left |
 |---|---|
+| **A split by complex, not by mutation count** | the comparison above is fair but neither model is tested on an unseen complex. Refitting both on a complex-level or family-level split is the experiment that would show whether the margin survives |
+| **The nine missing test rows and 99 training rows** | 2C5D (2, duplicate mutation tokens), 2NYY (1), 3VR6 (6); the training shortfall is mostly 1KBH. Resolving the duplicate-mutation definition would close the cohort to the full 595 / 1,126 |
 | **Homology clustering of the 68 blind complexes** | a different PDB id is not a different protein. Of the 17 blind complexes absent from training, an unknown number are homologues of training complexes — barnase/barstar, β-lactamase/BLIP and lysozyme/antibody families all recur in SKEMPI under several ids. Until they are clustered by sequence identity, "0.672 on unseen complexes" is an upper bound. Sequences for the 147 real PDB entries are downloadable; the clustering is single-linkage over chains at 99% and 90% identity |
 | **Scoring the training set's own cross-validation** | the paper reports CV1 0.87 (random 80/20), CV4 0.76 (leave-one-complex-out) and CV5 0.73 (leave-one-binding-site-out). The released `prediction_mmCSM-PPI` column on the training file is not identified as out-of-fold, so it cannot stand in for any of them |
 | **The abstract's 10-fold CV figure** | the abstract reports 0.75 / RMSE 1.64 under 10-fold CV. No such number appears in the body, whose closest entry is CV4 at 0.76 / 1.59. Unresolved |

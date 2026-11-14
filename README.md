@@ -248,8 +248,11 @@ mmCSM-PPI (Rodrigues, Pires & Ascher, *NAR* 2021), which predicts the effect of 
 point mutations from structure-based signatures rather than from a foundation model. It
 scores any predictor against mmCSM-PPI, FoldX, Discovery Studio and ZEMu on the same rows,
 using the predictions shipped inside the authors' own released files, so nothing has to be
-reimplemented. Its README carries the numbers to beat and what the released files actually
-contain. The two halves of this repository share no code and no cohort.
+reimplemented. Its README carries the full comparison and what the released files actually contain. On
+mmCSM-PPI's own 595-mutation blind set, the block-penalised ridge scores Pearson 0.868 and
+RMSE 1.41 kcal/mol against mmCSM-PPI's 0.687 and 2.06 — a paired difference of +0.166
+[+0.065, +0.356] over 66 complexes — and a trained network on the same features does not
+beat it there either. The two halves of this repository share no code and no cohort.
 
 ## Citation
 
