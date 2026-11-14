@@ -137,6 +137,44 @@ at +0.31 and the ridge below zero. Neither model has been shown to transfer to a
 protein family, because neither has been tested on one. Any claim that stops at the first
 row of that table is claiming more than these files can support.
 
+## Why 118 rows were dropped, and what it would take to get them back
+
+The ridge scored 586 of the 595 blind mutations and trained on 1,231 of the 1,340 released
+rows. `diagnose_missing.py` classifies every dropped row; it needs the local feature
+cohort, so it is a record of the diagnosis rather than something a reader can re-run.
+
+| | rows | what it is |
+|---|---|---|
+| complex never folded | 110 | 1KBH 86, 3VR6 14, 4GNK 4, 2NYY 3, 2NZ9 2, 4GXU 1 — no Boltz features exist for these complexes at all |
+| several interfaces, resolved by label | 6 | 3SE3, recoverable now, see below |
+| complex folded, this mutant was not | 2 | 2C5D, blocked on a defect in SKEMPI, see below |
+
+**The six 3SE3 rows are free.** 3SE3 has two interfaces, `3SE3_B_A` and `3SE3_B_C`, and a
+mutation on chain B appears under both with very different measured effects — log Kd 3.20
+against −0.16 for the same three substitutions. The preparation code required exactly one
+candidate feature row and skipped these. They disambiguate exactly by matching mmCSM-PPI's
+own ΔΔG against the SKEMPI row it came from, provided the sign convention is handled:
+mmCSM-PPI's ΔΔG is ln(K_wt) − ln(K_mt), the negative of RT·ln(Kd_mut/Kd_wt). All six then
+resolve to a single interface with a residual of 0.0000.
+
+**The two 2C5D rows are not a parsing problem.** SKEMPI 2.0's own `Mutation(s)_PDB` field
+carries a duplicated token for them:
+
+```
+2C5D   RA310E,KA312E,RB310E,KA312E      KA312E twice
+2C5D   EC56R,EC59R,ED56R,EC59R          EC59R twice
+```
+
+mmCSM-PPI copied the field faithfully, so the defect is upstream of both. Whether the
+intended set is K312E on chain A twice or on chains A and B cannot be read off the file,
+and a mutant cannot be folded until it is settled. These two rows are blocked on a
+definition, not on compute.
+
+**The remaining 110 need 118 structures folded** — the six absent complexes with their
+wild types, plus the two 2C5D mutants if their mutation set is ever resolved.
+`data/to_fold.csv` lists them. 1KBH alone is 86 of the 110, so folding one complex
+recovers three quarters of the shortfall and takes the training set from 1,231 to 1,317.
+
 ## One thing to know before claiming a win
 
 The blind set is separated from the training set **by mutation count** — two or three
@@ -196,7 +234,7 @@ forgotten.
 | | why it was left |
 |---|---|
 | **A split by complex, not by mutation count** | the comparison above is fair but neither model is tested on an unseen complex. Refitting both on a complex-level or family-level split is the experiment that would show whether the margin survives |
-| **The nine missing test rows and 99 training rows** | 2C5D (2, duplicate mutation tokens), 2NYY (1), 3VR6 (6); the training shortfall is mostly 1KBH. Resolving the duplicate-mutation definition would close the cohort to the full 595 / 1,126 |
+| **Closing the cohort** | diagnosed below. Six rows are recoverable now; 110 need 118 structures folded; two are blocked on a defect in SKEMPI itself |
 | **A benchmark with new families in it** | done and reported above: only 7 of the 68 blind complexes are a family the training set never saw, carrying 19 rows. No protocol over these files can measure out-of-family transfer, because the data for it is not there. Testing that needs a different cohort |
 | **Scoring the training set's own cross-validation** | the paper reports CV1 0.87 (random 80/20), CV4 0.76 (leave-one-complex-out) and CV5 0.73 (leave-one-binding-site-out). The released `prediction_mmCSM-PPI` column on the training file is not identified as out-of-fold, so it cannot stand in for any of them |
 | **The abstract's 10-fold CV figure** | the abstract reports 0.75 / RMSE 1.64 under 10-fold CV. No such number appears in the body, whose closest entry is CV4 at 0.76 / 1.59. Unresolved |
