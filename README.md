@@ -241,6 +241,16 @@ elsewhere:
 | `reproduce.py` | fit on the released pickles and print the penalty curve |
 | `RESULTS.md` | the full record, with the experiment behind every number |
 
+## A second baseline: `mmcsm-ppi/`
+
+`mmcsm-ppi/` is a separate, self-contained harness for a different published method —
+mmCSM-PPI (Rodrigues, Pires & Ascher, *NAR* 2021), which predicts the effect of *multiple*
+point mutations from structure-based signatures rather than from a foundation model. It
+scores any predictor against mmCSM-PPI, FoldX, Discovery Studio and ZEMu on the same rows,
+using the predictions shipped inside the authors' own released files, so nothing has to be
+reimplemented. Its README carries the numbers to beat and what the released files actually
+contain. The two halves of this repository share no code and no cohort.
+
 ## Citation
 
 The method and the data this builds on:

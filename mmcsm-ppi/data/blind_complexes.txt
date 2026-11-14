@@ -1,0 +1,98 @@
+# The 68 complexes of the mmCSM-PPI blind test, and the 24 of the ZEMu set.
+# Exclude these (and their homologues) from training to test on them honestly.
+# A * marks a complex that is also in the released mmCSM-PPI training set.
+[blindtest]
+1a22 *
+1ak4
+1ao7 *
+1bj1 *
+1bp3 *
+1cho *
+1cz8 *
+1emv *
+1fss *
+1jrh *
+1jtg *
+1lfd *
+1mhp *
+1mlc *
+1mq8 *
+1n8z *
+1ohz *
+1ppf *
+1qab
+1r0r *
+1rew *
+1xxm
+1ycs
+1yqv
+1yy9 *
+2b2x *
+2c5d *
+2g2u *
+2ny7 *
+2nyy *
+2oob *
+2p5e
+2pye
+2qj9
+2qja
+2qjb
+2vn5 *
+2wpt *
+3bdy
+3be1
+3eg5 *
+3g6d *
+3hg1
+3idx *
+3kud *
+3l5x *
+3m63
+3mzw *
+3ngb *
+3se3 *
+3sgb *
+3u82
+3vr6 *
+4ftv *
+4g0n *
+4k71 *
+4mnq
+4myw
+4nkq *
+4ofy *
+4ra0 *
+4rs1 *
+4uyp *
+4uyq *
+4yfd *
+4yh7 *
+5e9d *
+5ufe *
+
+[blindtest_zemu]
+1a22 *
+1a4y *
+1ahw *
+1dan *
+1dqj *
+1dvf *
+1emv *
+1fcc *
+1gc1 *
+1he8 *
+1jrh *
+1jtg *
+1lfd *
+1mlc *
+1rew *
+1tm1 *
+1vfb *
+1z7x *
+2oob *
+2pcc *
+2qj9
+2qja
+2qjb
+2wpt *

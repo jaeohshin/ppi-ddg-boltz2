@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mmcsm-bench"
+version = "0.1.0"
+description = "Head-to-head benchmark against mmCSM-PPI on its own released test sets"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.24", "scipy>=1.10"]
+
+[tool.setuptools]
+packages = ["mmcsm_bench"]
