@@ -102,6 +102,41 @@ homology-controlled splits.
 - Overlap between these complexes and Boltz-2's pretraining was not audited.
 - This benchmark had been looked at before the run, so it is not a fully blind confirmation.
 
+## How far the margin reaches
+
+A PDB id is not a protein family. Clustering the 147 complexes in these files by chain
+sequence identity — single linkage, two entries joined when they share a chain cluster —
+turns the 130 training entries into 73 families at 99% identity, 67 at 95% and 60 at 90%.
+Grading the blind set by what the training set actually contained
+(`analyse_homology.py`):
+
+| the blind rows where… | rows | complexes | mmCSM-PPI | ridge | difference |
+|---|---|---|---|---|---|
+| everything | 595 | 68 | +0.687 | +0.868 | **+0.166 [+0.065, +0.359]** |
+| the same PDB entry is in training | 525 | 51 | +0.714 | +0.879 | **+0.146 [+0.042, +0.356]** |
+| the PDB entry is new | 70 | 17 | +0.672 | +0.753 | +0.081 [−0.026, +0.339] |
+| **the family is new** | **19** | **7** | **+0.306** | **−0.115** | −0.421 [−1.506, −0.035] |
+
+Pearson; the last two rows are at 99% identity, and 95% and 90% give 18 rows over 6
+complexes with mmCSM-PPI at −0.010 and the ridge at −0.225.
+
+**The margin shrinks monotonically as the test gets stricter**: +0.166 over everything,
++0.146 where the complex was trained on, +0.081 on a new PDB entry with an interval that
+now includes zero, and nothing favourable where the family is new.
+
+Two things follow, and they pull in opposite directions.
+
+The comparison above is still **fair**: mmCSM-PPI was trained under exactly the same
+condition, on the same mutation-count split, so on the paper's own protocol the ridge wins
+it, and that is what the protocol was built to measure.
+
+But the win is **earned almost entirely on complexes the model had already seen**. Where
+the family is new there are 19 rows over 7 complexes — far too few to conclude anything,
+with an interval spanning 1.5 — and on that little evidence **both methods fail**, mmCSM-PPI
+at +0.31 and the ridge below zero. Neither model has been shown to transfer to a new
+protein family, because neither has been tested on one. Any claim that stops at the first
+row of that table is claiming more than these files can support.
+
 ## One thing to know before claiming a win
 
 The blind set is separated from the training set **by mutation count** — two or three
@@ -162,7 +197,7 @@ forgotten.
 |---|---|
 | **A split by complex, not by mutation count** | the comparison above is fair but neither model is tested on an unseen complex. Refitting both on a complex-level or family-level split is the experiment that would show whether the margin survives |
 | **The nine missing test rows and 99 training rows** | 2C5D (2, duplicate mutation tokens), 2NYY (1), 3VR6 (6); the training shortfall is mostly 1KBH. Resolving the duplicate-mutation definition would close the cohort to the full 595 / 1,126 |
-| **Homology clustering of the 68 blind complexes** | a different PDB id is not a different protein. Of the 17 blind complexes absent from training, an unknown number are homologues of training complexes — barnase/barstar, β-lactamase/BLIP and lysozyme/antibody families all recur in SKEMPI under several ids. Until they are clustered by sequence identity, "0.672 on unseen complexes" is an upper bound. Sequences for the 147 real PDB entries are downloadable; the clustering is single-linkage over chains at 99% and 90% identity |
+| **A benchmark with new families in it** | done and reported above: only 7 of the 68 blind complexes are a family the training set never saw, carrying 19 rows. No protocol over these files can measure out-of-family transfer, because the data for it is not there. Testing that needs a different cohort |
 | **Scoring the training set's own cross-validation** | the paper reports CV1 0.87 (random 80/20), CV4 0.76 (leave-one-complex-out) and CV5 0.73 (leave-one-binding-site-out). The released `prediction_mmCSM-PPI` column on the training file is not identified as out-of-fold, so it cannot stand in for any of them |
 | **The abstract's 10-fold CV figure** | the abstract reports 0.75 / RMSE 1.64 under 10-fold CV. No such number appears in the body, whose closest entry is CV4 at 0.76 / 1.59. Unresolved |
 | **Double versus triple, and per-complex scores** | not reported in the paper's body; possibly in supplementary tables S8–S11, unread |
