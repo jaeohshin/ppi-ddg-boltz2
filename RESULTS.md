@@ -136,7 +136,7 @@ single linkage; two PDB ids are linked when they share a chain cluster (10-08 f,
 
 | split | reader | head | reader − head |
 |---|---|---|---|
-| `rdenet` (PDB id) | 0.626 | 0.589 | +0.015 [−0.023, +0.055] |
+| `rdenet` (PDB id) | 0.604 / 0.626 | 0.589 | +0.015 [−0.023, +0.055] |
 | `hom99` (127 groups) | 0.573 | 0.505 | +0.068 [+0.030, +0.109] |
 | `holdoutprot` (159 groups) | 0.579 | 0.524 | +0.055 [+0.021, +0.088] |
 
@@ -147,6 +147,13 @@ is homology recall. But the head falls twice as far.
 
 Note against a "more room to fall" account: the reader starts higher (0.626 against 0.589)
 *and* falls less.
+
+The two `rdenet` reader values are the open penalty-selection problem of §7.1 in the
+headline table: the `table2` out-of-fold run scores 0.6040 and the report run 0.6216, and
+the +0.0147 difference quoted against the head's 0.5893 is measured on the first of them
+(2026-10-08 d). The `hom99` and `holdoutprot` rows carry no such ambiguity — there the
+difference is the subtraction of the two columns. This is the clearest reason the project
+settled on quoting the gap rather than a reader score.
 
 `holdoutprot` is the SKEMPI curators' own grouping, is what PPIformer split on, and is the
 one Bushuiev et al. measured at 0% leakage. It is also the looser of the two controlled

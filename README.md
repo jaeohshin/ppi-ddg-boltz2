@@ -17,14 +17,18 @@ complexes.
 
 | split | external leakage | reader | head | reader − head |
 |---|---|---|---|---|
-| `rdenet` (what the field uses, grouped by PDB id) | 56% | 0.626 | 0.589 | +0.015 [−0.023, +0.055] |
+| `rdenet` (what the field uses, grouped by PDB id) | 56% | 0.604 – 0.626 | 0.589 | +0.015 [−0.023, +0.055] |
 | `hom99` (ours, 99% chain identity, 127 groups) | not measured | 0.573 | 0.505 | **+0.068 [+0.030, +0.109]** |
 | `holdoutprot` (SKEMPI curators' own groups, 159 groups) | 0% | 0.579 | 0.524 | **+0.055 [+0.021, +0.088]** |
 
 Leakage percentages are Bushuiev et al.'s iAlign measurements of these splits, not ours.
-The `reader − head` column is a paired complex-level bootstrap of the difference; it is
-not the subtraction of the two preceding columns, which come from runs scored under
-different penalty conventions.
+The `rdenet` reader entry is a range, not a point, and the difference beside it is
+measured at its lower end: two runs of the same procedure on the same inputs selected
+different penalties and landed at 0.604 and 0.626, which is the selection spread described
+below. They are two points on one curve — `reproduce.py` prints 0.6031 at alpha 31.6 and
+0.6264 at alpha 1 — and the difference quoted pairs the 0.604 run against the head's 0.589
+on the same complexes. The two controlled rows do not have this ambiguity; there each
+difference is the subtraction of the two columns beside it.
 
 **Read the controlled rows.** `rdenet` groups by PDB id, which is not enough: at 99%
 chain identity the cohort's 50 antibody–antigen PDB ids collapse to 22 independent
