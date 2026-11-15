@@ -250,10 +250,12 @@ point mutations from structure-based signatures rather than from a foundation mo
 scores any predictor against mmCSM-PPI, FoldX, Discovery Studio and ZEMu on the same rows,
 using the predictions shipped inside the authors' own released files, so nothing has to be
 reimplemented. Its README carries the full comparison and what the released files actually contain. On
-mmCSM-PPI's own 595-mutation blind set, the block-penalised ridge scores Pearson 0.868 and
-RMSE 1.41 kcal/mol against mmCSM-PPI's 0.687 and 2.06 — a paired difference of +0.166
-[+0.065, +0.356] over 66 complexes — and a trained network on the same features does not
-beat it there either. The two halves of this repository share no code and no cohort.
+mmCSM-PPI's own 595-mutation blind set, the block-penalised ridge scores Pearson 0.865 and
+RMSE 1.44 kcal/mol against mmCSM-PPI's 0.687 and 2.06 — a paired difference of +0.163
+[+0.062, +0.351] over 66 complexes — and a trained network on the same features does not
+beat it there either. The third decimal of that 0.865 is penalty-selection noise rather
+than a property of the model, which its README measures and quantifies; the gap is what
+survives. The two halves of this repository share no code and no cohort.
 
 ## Citation
 

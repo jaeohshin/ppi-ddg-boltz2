@@ -3,10 +3,19 @@ methods on the blind complexes whose family the training set never contained."""
 import csv, glob, os, sys, time, collections, json
 import numpy as np
 from scipy import stats
-from Bio import Align
-from Bio.Align import substitution_matrices
 
+USAGE = """usage: analyse_homology.py <release dir> <fasta dir> <identity> [predictions.csv] [out dir]
+
+Clusters the complexes by chain identity and grades the blind set by what the
+training set contained.  The clustering is the slow part (all-pairs global
+alignment), so it is cached as <out dir>/families_<identity>.json and reused."""
+if len(sys.argv) < 4: sys.exit(USAGE)
+HERE = os.path.dirname(os.path.abspath(__file__))
 D, FA, TH = sys.argv[1], sys.argv[2], float(sys.argv[3])
+PRED = sys.argv[4] if len(sys.argv) > 4 else f"{HERE}/data/predictions_boltz_block_ridge_cohort1237.csv"
+OUT = sys.argv[5] if len(sys.argv) > 5 else f"{HERE}/data"
+os.makedirs(OUT, exist_ok=True)
+CACHE = f"{OUT}/families_{TH}.json"
 T0 = time.time()
 def log(m): print(f"[{time.time()-T0:5.0f}s] {m}", flush=True)
 def pid(s): return s.split("-")[0].strip().lower()
@@ -20,55 +29,61 @@ def fasta(p):
     if cur: out.append("".join(cur))
     return [s for s in out if len(s) >= 20]
 
-chains = {os.path.basename(p)[:-6]: fasta(p) for p in glob.glob(f"{FA}/*.fasta")}
-uniq = sorted({c for v in chains.values() for c in v})
-idx = {c: i for i, c in enumerate(uniq)}
-par = list(range(len(uniq)))
-def find(x):
-    while par[x] != x: par[x] = par[par[x]]; x = par[x]
-    return x
-log(f"{len(chains)} entries, {len(uniq)} distinct chain sequences")
+def cluster():
+    from Bio import Align
+    from Bio.Align import substitution_matrices
+    chains = {os.path.basename(p)[:-6]: fasta(p) for p in glob.glob(f"{FA}/*.fasta")}
+    uniq = sorted({c for v in chains.values() for c in v})
+    idx = {c: i for i, c in enumerate(uniq)}
+    par = list(range(len(uniq)))
+    def find(x):
+        while par[x] != x: par[x] = par[par[x]]; x = par[x]
+        return x
+    log(f"{len(chains)} entries, {len(uniq)} distinct chain sequences")
 
-al = Align.PairwiseAligner(mode="global")
-al.substitution_matrix = substitution_matrices.load("BLOSUM62")
-al.open_gap_score, al.extend_gap_score = -11, -1
-n = 0
-for i in range(len(uniq)):
-    for j in range(i + 1, len(uniq)):
-        if find(i) == find(j): continue
-        a, b = uniq[i], uniq[j]
-        if not 0.5 <= len(a) / len(b) <= 2.0: continue
-        n += 1
-        aln = al.align(a, b)[0]
-        m = sum(1 for x, y in zip(aln[0], aln[1]) if x == y and x != "-")
-        if m / min(len(a), len(b)) >= TH:
-            par[find(i)] = find(j)
-    if i % 50 == 0: log(f"  {i}/{len(uniq)} ({n} alignments)")
-log(f"{n} alignments at identity >= {TH}")
+    al = Align.PairwiseAligner(mode="global")
+    al.substitution_matrix = substitution_matrices.load("BLOSUM62")
+    al.open_gap_score, al.extend_gap_score = -11, -1
+    n = 0
+    for i in range(len(uniq)):
+        for j in range(i + 1, len(uniq)):
+            if find(i) == find(j): continue
+            a, b = uniq[i], uniq[j]
+            if not 0.5 <= len(a) / len(b) <= 2.0: continue
+            n += 1
+            aln = al.align(a, b)[0]
+            m = sum(1 for x, y in zip(aln[0], aln[1]) if x == y and x != "-")
+            if m / min(len(a), len(b)) >= TH:
+                par[find(i)] = find(j)
+        if i % 50 == 0: log(f"  {i}/{len(uniq)} ({n} alignments)")
+    log(f"{n} alignments at identity >= {TH}")
+    return chains, uniq, idx, find
 
-ep = {p: p for p in chains}
-def ef(x):
-    while ep[x] != x: ep[x] = ep[ep[x]]; x = ef_next(x)
-    return x
-def ef2(x):
-    while ep[x] != x: ep[x] = ep[ep[x]]; x = ep[x]
-    return x
-bc = collections.defaultdict(list)
-for p, cs in chains.items():
-    for c in cs: bc[find(idx[c])].append(p)
-for mem in bc.values():
-    for m in mem[1:]:
-        a, b = ef2(mem[0]), ef2(m)
-        if a != b: ep[a] = b
-fam = {p: ef2(p) for p in chains}
-log(f"{len(set(fam.values()))} families among {len(fam)} entries")
+if os.path.exists(CACHE):
+    fam = json.load(open(CACHE))["family_of"]
+    log(f"{len(set(fam.values()))} families among {len(fam)} entries (cached: {CACHE})")
+else:
+    chains, uniq, idx, find = cluster()
+    ep = {p: p for p in chains}
+    def root(x):
+        while ep[x] != x: ep[x] = ep[ep[x]]; x = ep[x]
+        return x
+    bc = collections.defaultdict(list)
+    for p, cs in chains.items():
+        for c in cs: bc[find(idx[c])].append(p)
+    for mem in bc.values():
+        for m in mem[1:]:
+            a, b = root(mem[0]), root(m)
+            if a != b: ep[a] = b
+    fam = {p: root(p) for p in chains}
+    log(f"{len(set(fam.values()))} families among {len(fam)} entries")
 
 def rows(p): return [r for r in list(csv.reader(open(p)))[1:] if r]
 train_pdb = {pid(r[0]) for r in rows(f"{D}/train_set.raw")}
 train_fam = {fam[p] for p in train_pdb if p in fam}
 blind = [dict(pdb=pid(r[0]), muts=r[1], y=float(r[2]), mm=float(r[5])) for r in rows(f"{D}/blindtest.raw")]
 mine = {}
-for r in csv.DictReader(open("/data/work/prefold-dg-linear-probe/mmcsm-ppi/data/predictions_boltz_block_ridge.csv")):
+for r in csv.DictReader(open(PRED)):
     mine[(pid(r["pdb"]), tuple(sorted(m.strip() for m in r["mutations"].split(","))))] = float(r["prediction"])
 for b in blind:
     b["ridge"] = mine.get((b["pdb"], tuple(sorted(m.strip() for m in b["muts"].split(",")))), np.nan)
@@ -106,4 +121,4 @@ print(f"  training: {len(train_pdb)} entries -> {len(train_fam)} families")
 json.dump({"threshold": TH, "family_of": fam,
            "train_families": sorted(train_fam),
            "blind_new_family_pdbs": sorted({b['pdb'] for b in new_fam})},
-          open(f"/data/work/mmcsm-analysis/families_{TH}.json", "w"), indent=1)
+          open(CACHE, "w"), indent=1)
