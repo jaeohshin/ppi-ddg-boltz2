@@ -178,6 +178,16 @@ complexes with mmCSM-PPI at −0.010 and the ridge at −0.225.
 +0.142 where the complex was trained on, +0.082 on a new PDB entry with an interval that
 now includes zero, and nothing favourable where the family is new.
 
+This has now been tested directly rather than inferred from subsets, by refitting
+family-disjoint: [`docs/FAMILY_SPLIT.md`](../docs/FAMILY_SPLIT.md). Leave-one-family-out
+over all 34 families drops the ridge from 0.865 to **0.555** Pearson, against mmCSM-PPI's
+0.702 on the same rows — but mmCSM-PPI saw every held-out family and the ridge did not, so
+the paired difference, −0.076 [−0.343, +0.370] Pearson and −0.010 [−0.193, +0.299] ρ, is
+undetermined rather than a loss. The margin quoted at the top of this file is a property
+of the lenient split. Two further results came out of that run: the penalty instability
+was the validation split being mismatched, not the data, and **only the 128-wide pair
+block generalises — dropping both 147,456-wide sequence blocks costs 0.0011 Pearson.**
+
 Two things follow, and they pull in opposite directions.
 
 The comparison above is still **fair**: mmCSM-PPI was trained under exactly the same
@@ -313,14 +323,15 @@ forgotten.
 
 | | why it was left |
 |---|---|
-| **A split by complex, not by mutation count** | the comparison above is fair but neither model is tested on an unseen complex. Refitting both on a complex-level or family-level split is the experiment that would show whether the margin survives |
+| ~~A split by complex, not by mutation count~~ | **done**: [`docs/FAMILY_SPLIT.md`](../docs/FAMILY_SPLIT.md). Leave-one-family-out over 34 families. The margin does not survive, and the comparison cannot be made symmetric because mmCSM-PPI cannot be retrained |
 | **Closing the cohort** | diagnosed below. The six ambiguous rows are recovered; 110 still need 118 structures folded; two are blocked on a defect in SKEMPI itself. Folding is not a free operation: the fitted features are the PreFold-dG authors' released pickles, so new local features would be a second producer in one training set. [`docs/PROVENANCE.md`](../docs/PROVENANCE.md) gives the hashes, how far local re-folds agree, why cosine is not an acceptance test, and the held-out-features test to run first |
-| **A benchmark with new families in it** | done and reported above: only 7 of the 68 blind complexes are a family the training set never saw, carrying 19 rows. No protocol over these files can measure out-of-family transfer, because the data for it is not there. Testing that needs a different cohort |
+| **A benchmark with new families in it** | still open, and now the main gap. Leave-one-family-out reuses these 34 families; a genuinely new cohort is what would settle the comparison. Reported above: only 7 of the 68 blind complexes are a family the training set never saw, carrying 19 rows. No protocol over these files can measure out-of-family transfer, because the data for it is not there. Testing that needs a different cohort |
 | **Scoring the training set's own cross-validation** | the paper reports CV1 0.87 (random 80/20), CV4 0.76 (leave-one-complex-out) and CV5 0.73 (leave-one-binding-site-out). The released `prediction_mmCSM-PPI` column on the training file is not identified as out-of-fold, so it cannot stand in for any of them |
 | **The abstract's 10-fold CV figure** | the abstract reports 0.75 / RMSE 1.64 under 10-fold CV. No such number appears in the body, whose closest entry is CV4 at 0.76 / 1.59. Unresolved |
 | **Double versus triple, and per-complex scores** | not reported in the paper's body; possibly in supplementary tables S8–S11, unread |
 | **Which side owns the Discovery Studio sign** | needs a Discovery Studio run, or the authors |
-| **A penalty-selection rule that does not move with 0.5% of the data** | four rules tried, written up in [`docs/SELECTION.md`](../docs/SELECTION.md). Repeating the split fixes the variance and exposes a bias instead; matching the blind set's mixture of seen and unseen complexes is the best rule so far but was designed with the blind surface in view. **Open**, and the family-level split is where it gets judged |
+| ~~A penalty-selection rule that does not move with 0.5% of the data~~ | **settled**, in [`docs/FAMILY_SPLIT.md`](../docs/FAMILY_SPLIT.md). Match the inner split to the deployment condition: family-grouped inner folds pick the same weight in 34 of 34 outer folds. The instability was the mismatch, not the data |
+| **Refit the pair-block-only model as the primary one** | Result 3 of the family split: 128 features do everything 295,040 do, once the family is new. The published fits still carry all three blocks |
 | **Selecting on Spearman while reporting Pearson** | the inner rule maximises rank correlation; the headline quotes Pearson, and the two order the penalty grid differently. Inherited from the original run script. Either align them or report both and name the one that selected. This is a protocol defect, not a presentation choice |
 
 ## Citation

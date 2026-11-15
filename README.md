@@ -242,6 +242,7 @@ elsewhere:
 | `RESULTS.md` | the full record, with the experiment behind every number |
 | `docs/PROVENANCE.md` | which files every number is fitted on, with hashes, and what may be added to the cohort |
 | `docs/SELECTION.md` | how the penalty is chosen, four rules compared, and the two things that are not settled |
+| `docs/FAMILY_SPLIT.md` | the same comparison with similarity controlled: what the margin was worth, and which 128 features did the work |
 
 ## A second baseline: `mmcsm-ppi/`
 
@@ -255,8 +256,15 @@ mmCSM-PPI's own 595-mutation blind set, the block-penalised ridge scores Pearson
 RMSE 1.44 kcal/mol against mmCSM-PPI's 0.687 and 2.06 — a paired difference of +0.163
 [+0.062, +0.351] over 66 complexes — and a trained network on the same features does not
 beat it there either. The third decimal of that 0.865 is penalty-selection noise rather
-than a property of the model, which its README measures and quantifies; the gap is what
-survives. The two halves of this repository share no code and no cohort.
+than a property of the model, which its README measures and quantifies.
+
+That margin is a property of the split, though, and the split is lenient: 516 of the 586
+scorable rows sit on complexes the training release contains. Refitted leave-one-family-out
+over all 34 families, the ridge falls to 0.555 against mmCSM-PPI's 0.702 on the same rows,
+and since mmCSM-PPI saw every held-out family while the ridge did not, the difference is
+undetermined rather than a loss. The same run showed that only the 128-wide pair block
+generalises: dropping both 147,456-wide sequence blocks costs 0.0011 Pearson once the
+family is new. `docs/FAMILY_SPLIT.md` has it. The two halves of this repository share no code and no cohort.
 
 ## Citation
 
