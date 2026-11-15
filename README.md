@@ -258,10 +258,12 @@ elsewhere:
 | `reproduce.py` | fit on the released pickles and print the penalty curve |
 | `block_ablation.py` | refit on block subsets; which of the three blocks generalises |
 | `pair_block.py` | extract the 128-wide pair block once (2.6 MiB) and score it on all four splits |
+| `pair_block_dimensions.py` | how many of the 128 carry the signal, with the ranking recomputed per fold |
 | `RESULTS.md` | the full record, with the experiment behind every number |
 | `docs/PROVENANCE.md` | which files every number is fitted on, with hashes, and what may be added to the cohort |
 | `docs/SELECTION.md` | how the penalty is chosen, four rules compared, and the two things that are not settled |
 | `docs/FAMILY_SPLIT.md` | the same comparison with similarity controlled: what the margin was worth, and which 128 features did the work |
+| `docs/PAIR_BLOCK.md` | inside the 128: four dimensions are enough, and the strong ones are copies of each other |
 
 ## A second baseline: `mmcsm-ppi/`
 
