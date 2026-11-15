@@ -241,6 +241,7 @@ elsewhere:
 | `reproduce.py` | fit on the released pickles and print the penalty curve |
 | `RESULTS.md` | the full record, with the experiment behind every number |
 | `docs/PROVENANCE.md` | which files every number is fitted on, with hashes, and what may be added to the cohort |
+| `docs/SELECTION.md` | how the penalty is chosen, four rules compared, and the two things that are not settled |
 
 ## A second baseline: `mmcsm-ppi/`
 

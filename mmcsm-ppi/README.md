@@ -110,8 +110,21 @@ The honest reading: the margin over mmCSM-PPI is robust — every cell of the gr
 α≈0.1 clears it, and the paired interval excludes zero in both fits — but the third decimal
 place of the headline is penalty-selection noise, not a property of the model. Quote the
 gap, not the digits. The full grid for both cohorts is in
-`data/penalty_sensitivity.json`, and the rule itself is `mmcsm_bench/disambiguate.py`
-with `tests_mmcsm/test_disambiguate.py` pinning it on the real 3SE3 affinities. A selection rule stable enough to pin them down is an open problem
+`data/penalty_sensitivity.json`, and the recovery rule is `mmcsm_bench/disambiguate.py`
+with `tests_mmcsm/test_disambiguate.py` pinning it on the real 3SE3 affinities.
+
+Three further selection rules were then tried — repeated grouped folds, row-level folds,
+and folds matching the blind set's own mixture of seen and unseen complexes.
+[`docs/SELECTION.md`](../docs/SELECTION.md) has all of it. The short version is that
+repeating the split stabilised the argmax and made the blind score *worse*, because
+grouped inner validation estimates a harder task than this blind set poses and therefore
+prefers more regularisation — a bias no number of repeats removes. Matching the mixture
+is the best of the rules on the criterion they all optimise, but it was designed after the
+blind surface had been looked at, so **the headline here stays at the pre-registered
+single-split run** and the mixture rule will be judged on the family-level split, where no
+penalty has been chosen yet. Across all five rules the margin over mmCSM-PPI ranges
++0.146 to +0.166 Pearson with every interval clear of zero, which is the one thing none of
+this disturbs. A selection rule stable enough to pin them down is an open problem
 here, and it is the same instability that shows up as the `rdenet` range in the parent
 directory's results.
 
@@ -307,7 +320,8 @@ forgotten.
 | **The abstract's 10-fold CV figure** | the abstract reports 0.75 / RMSE 1.64 under 10-fold CV. No such number appears in the body, whose closest entry is CV4 at 0.76 / 1.59. Unresolved |
 | **Double versus triple, and per-complex scores** | not reported in the paper's body; possibly in supplementary tables S8–S11, unread |
 | **Which side owns the Discovery Studio sign** | needs a Discovery Studio run, or the authors |
-| **A penalty-selection rule that does not move with 0.5% of the data** | measured above: six training rows change the selected penalty, and that change costs 3.5x what the rows gained. The margin survives it, the third decimal does not. Repeated-fold or bootstrap-averaged inner selection is the obvious next thing to try, and it would also close the `rdenet` range in the parent directory |
+| **A penalty-selection rule that does not move with 0.5% of the data** | four rules tried, written up in [`docs/SELECTION.md`](../docs/SELECTION.md). Repeating the split fixes the variance and exposes a bias instead; matching the blind set's mixture of seen and unseen complexes is the best rule so far but was designed with the blind surface in view. **Open**, and the family-level split is where it gets judged |
+| **Selecting on Spearman while reporting Pearson** | the inner rule maximises rank correlation; the headline quotes Pearson, and the two order the penalty grid differently. Inherited from the original run script. Either align them or report both and name the one that selected. This is a protocol defect, not a presentation choice |
 
 ## Citation
 
