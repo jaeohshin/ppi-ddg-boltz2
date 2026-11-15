@@ -1,0 +1,111 @@
+{
+  "question": "does the published blind performance survive replacing the authors features with a local Boltz re-fold (scaled_v1_recycle3)?",
+  "rows": {
+    "cohort_after_coverage_filter": 1412,
+    "train": 972,
+    "test": 440,
+    "feature_rows_needed": 1611,
+    "feature_rows_covered": 1218,
+    "feature_rows_dropped": 393,
+    "dropped_wt_ids": [
+      "boltz_results_1A4Y_A_B",
+      "boltz_results_1AO7_ABC_DE",
+      "boltz_results_1BD2_ABC_DE",
+      "boltz_results_1BJ1_HL_VW",
+      "boltz_results_1BRS_A_D",
+      "boltz_results_1CZ8_HL_VW",
+      "boltz_results_1DAN_HL_TU",
+      "boltz_results_1DQJ_AB_C",
+      "boltz_results_1DVF_AB_CD",
+      "boltz_results_1EMV_A_B",
+      "boltz_results_1JTG_A_B",
+      "boltz_results_1LFD_A_B",
+      "boltz_results_1MHP_HL_A",
+      "boltz_results_1MLC_AB_E",
+      "boltz_results_1N8Z_AB_C",
+      "boltz_results_1REW_AB_C",
+      "boltz_results_1VFB_AB_C",
+      "boltz_results_1YY9_CD_A",
+      "boltz_results_2B2X_HL_A",
+      "boltz_results_2KSO_A_B",
+      "boltz_results_2P5E_ABC_DE",
+      "boltz_results_2PCC_A_B",
+      "boltz_results_2PYE_ABC_DE",
+      "boltz_results_2VN5_A_B",
+      "boltz_results_2WPT_A_B",
+      "boltz_results_3BDY_HL_V",
+      "boltz_results_3BE1_HL_A",
+      "boltz_results_3BP8_A_C",
+      "boltz_results_3D3V_ABC_DE",
+      "boltz_results_3G6D_HL_A",
+      "boltz_results_3HFM_HL_Y",
+      "boltz_results_3KUD_A_B",
+      "boltz_results_3QIB_ABP_CD",
+      "boltz_results_3S9D_A_B",
+      "boltz_results_3SE4_B_C",
+      "boltz_results_4FTV_ABC_DE",
+      "boltz_results_4G0N_A_B",
+      "boltz_results_4L3E_ABC_DE",
+      "boltz_results_4MNQ_ABC_DE",
+      "boltz_results_4NKQ_C_AB",
+      "boltz_results_5E9D_ABC_DE",
+      "boltz_results_5UFE_A_B"
+    ],
+    "test_complexes": 59
+  },
+  "feature_agreement": {
+    "per_row_cosine_median": 0.8521882225014874,
+    "p05": 0.29219376562222255,
+    "p95": 0.9566078184297241
+  },
+  "authors_features": {
+    "selected": {
+      "matrix_weight": 2,
+      "alpha": 10.0
+    },
+    "n": 440,
+    "spearman": 0.8184742773152778,
+    "pearson": 0.8722583723762436,
+    "kendall": 0.6369770346367988,
+    "rmse": 1.4826652726188743,
+    "mae": 1.1566049106421112
+  },
+  "local_features": {
+    "selected": {
+      "matrix_weight": 0.5,
+      "alpha": 10.0
+    },
+    "n": 440,
+    "spearman": 0.7347478549927465,
+    "pearson": 0.8187268230998872,
+    "kendall": 0.5558239595924643,
+    "rmse": 1.7560418385404963,
+    "mae": 1.382069904143411
+  },
+  "mmCSM_same_rows": {
+    "n": 440,
+    "spearman": 0.7189944203546131,
+    "pearson": 0.7556465655987646,
+    "kendall": 0.5457025342832651,
+    "rmse": 1.9888714250686357,
+    "mae": 1.4160909090909093
+  },
+  "paired_pearson_deltas_over_complexes": {
+    "local_minus_authors": [
+      -0.053531549276356394,
+      -0.1306671765563228,
+      -0.02925198828988226
+    ],
+    "authors_minus_mmCSM": [
+      0.11661180677747895,
+      0.025634163373531926,
+      0.3423888521857023
+    ],
+    "local_minus_mmCSM": [
+      0.06308025750112256,
+      -0.048895709568517035,
+      0.2786990306703139
+    ]
+  },
+  "elapsed_seconds": 16.42295002937317
+}

@@ -1,0 +1,106 @@
+{
+ "all three": {
+  "authors": {
+   "pearson": 0.8754594513852584,
+   "spearman": 0.8198582153925309,
+   "alpha": 5.62341325190349,
+   "grid_edge": false
+  },
+  "local": {
+   "pearson": 0.8746033064911599,
+   "spearman": 0.8144912995844944,
+   "alpha": 1.7782794100389228,
+   "grid_edge": false
+  },
+  "local_minus_authors_pearson": [
+   -0.0008561448940984651,
+   -0.027569176907541335,
+   0.014626617188786085
+  ]
+ },
+ "wz only (128)": {
+  "authors": {
+   "pearson": 0.765234113399787,
+   "spearman": 0.7158335180686433,
+   "alpha": 17.78279410038923,
+   "grid_edge": false
+  },
+  "local": {
+   "pearson": 0.8022888823339254,
+   "spearman": 0.7293836157750467,
+   "alpha": 0.5623413251903491,
+   "grid_edge": false
+  },
+  "local_minus_authors_pearson": [
+   0.03705476893413839,
+   -0.03838967686503488,
+   0.08451707220190215
+  ]
+ },
+ "wsi only": {
+  "authors": {
+   "pearson": 0.699948921046424,
+   "spearman": 0.5887190733319771,
+   "alpha": 3.162277660168379,
+   "grid_edge": false
+  },
+  "local": {
+   "pearson": 0.7508740158124921,
+   "spearman": 0.6653349221152829,
+   "alpha": 0.31622776601683794,
+   "grid_edge": false
+  },
+  "local_minus_authors_pearson": [
+   0.0509250947660681,
+   0.0183910218304534,
+   0.08374701948866635
+  ]
+ },
+ "ws only": {
+  "authors": {
+   "pearson": 0.8951894171245818,
+   "spearman": 0.8598889482853815,
+   "alpha": 0.03162277660168379,
+   "grid_edge": false
+  },
+  "local": {
+   "pearson": 0.8913610997746966,
+   "spearman": 0.850919482757313,
+   "alpha": 0.03162277660168379,
+   "grid_edge": false
+  },
+  "local_minus_authors_pearson": [
+   -0.003828317349885202,
+   -0.029343210398871764,
+   0.0066157939054834755
+  ]
+ },
+ "wsi+ws": {
+  "authors": {
+   "pearson": 0.8318494075109257,
+   "spearman": 0.781845420303794,
+   "alpha": 0.09999999999999999,
+   "grid_edge": false
+  },
+  "local": {
+   "pearson": 0.831747125640675,
+   "spearman": 0.7765056930186512,
+   "alpha": 0.056234132519034905,
+   "grid_edge": false
+  },
+  "local_minus_authors_pearson": [
+   -0.0001022818702507422,
+   -0.026913269848795475,
+   0.025003713027260115
+  ]
+ },
+ "mmCSM_same_rows": {
+  "pearson": 0.7556465655987646,
+  "spearman": 0.7189944203546131
+ },
+ "rows": {
+  "train": 972,
+  "test": 440,
+  "test_complexes": 59
+ }
+}

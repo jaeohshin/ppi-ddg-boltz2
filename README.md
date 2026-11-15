@@ -259,6 +259,7 @@ elsewhere:
 | `block_ablation.py` | refit on block subsets; which of the three blocks generalises |
 | `pair_block.py` | extract the 128-wide pair block once (2.6 MiB) and score it on all four splits |
 | `pair_block_dimensions.py` | how many of the 128 carry the signal, with the ranking recomputed per fold |
+| `reproduction/` | the producer-swap test: refit on local Boltz output instead of the authors' pickles |
 | `RESULTS.md` | the full record, with the experiment behind every number |
 | `docs/PROVENANCE.md` | which files every number is fitted on, with hashes, and what may be added to the cohort |
 | `docs/SELECTION.md` | how the penalty is chosen, four rules compared, and the two things that are not settled |

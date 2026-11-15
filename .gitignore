@@ -12,3 +12,4 @@ venv/
 reader_*.json
 *.log
 pair_block.npz
+join_map_*.json
