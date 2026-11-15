@@ -1,7 +1,7 @@
 """Same cohort, same procedure, two feature producers.
 
 Arm A: the PreFold-dG authors' released skempi_{mut,wt}.pkl, as every published
-fit in prefold-dg-linear-probe uses.
+fit in this repository uses.
 Arm B: a local Boltz re-fold (scaled_v1_recycle3, recycling 3, wild-type PDB as
 template, seed 42).
 

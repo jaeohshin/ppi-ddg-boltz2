@@ -9,10 +9,12 @@ os.environ.update(OPENBLAS_NUM_THREADS='8',OMP_NUM_THREADS='8',MKL_NUM_THREADS='
 from pathlib import Path
 import numpy as np, pandas as pd, json, time, collections
 from scipy.stats import spearmanr, pearsonr
-O=Path(__file__).resolve().parent; E=O.parent; t0=time.time()
+O=Path(__file__).resolve().parent
+# E is the experiments root this ran under, not a path inside the repository.
+E=Path(os.environ.get('PREFOLD_EXPERIMENTS','/data/work/pythia_ppi/experiments')); t0=time.time()
 WIDTHS=[147456,147456,128]; P=sum(WIDTHS)
 WEIGHTS=[0.0,0.03125,0.0625,0.125,0.25,0.5,1,2,4]; ALPHAS=np.logspace(-3,3,13)
-FAM=json.load(open('/data/work/prefold-dg-linear-probe/mmcsm-ppi/data/families_0.99.json'))['family_of']
+FAM=json.load(open(O.parent/'families_0.99.json'))['family_of']
 c=pd.read_csv(E/'mmcsm_ridge_blind_20261115/cohort.csv')
 tr=np.flatnonzero(c['set']=='train'); te=np.flatnonzero(c['set']=='test')
 y=c.y.to_numpy(); sg=c.sign.to_numpy(); fi=c.feature_row.to_numpy()

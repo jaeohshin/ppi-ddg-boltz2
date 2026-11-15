@@ -1,4 +1,4 @@
-# prefold-dg-linear-probe
+# ppi-ddg-boltz2
 
 A linear reader of frozen Boltz-2 representations for protein–protein ΔΔG, and a
 re-examination of the split it is measured on.
