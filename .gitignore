@@ -11,3 +11,4 @@ venv/
 *.pt
 reader_*.json
 *.log
+pair_block.npz

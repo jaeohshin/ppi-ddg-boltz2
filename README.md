@@ -9,17 +9,34 @@ block matches the 58.4M-parameter head on the split the field uses, and signific
 outperforms it once homology is controlled — on identical inputs, the same cohort and
 the same folds.
 
+**And it needs 128 of the 295,040 numbers.** Of the three blocks, only the 128-wide pair
+block `wz` generalises. Dropping both 147,456-wide sequence blocks costs
+−0.038 [−0.073, −0.004] per-structure PCC on the 56%-leaked split and nothing
+distinguishable from zero on either homology-controlled one: +0.005 [−0.011, +0.023] on
+`hom99`, −0.004 [−0.041, +0.037] on `holdoutprot`. The 294,912 sequence dimensions buy
+homology recall and nothing else that can be measured here. A closed-form ridge on 128
+frozen numbers beats the 58.4M-parameter head by +0.073 and +0.052 on the two controlled
+splits.
+
 ## Results
 
 Per-structure Pearson correlation: a correlation inside each complex, averaged over the
 116 complexes carrying at least ten variants. Intervals are paired bootstraps over
 complexes.
 
-| split | external leakage | reader | head | reader − head |
-|---|---|---|---|---|
-| `rdenet` (what the field uses, grouped by PDB id) | 56% | 0.604 – 0.626 | 0.589 | +0.015 [−0.023, +0.055] |
-| `hom99` (ours, 99% chain identity, 127 groups) | not measured | 0.573 | 0.505 | **+0.068 [+0.030, +0.109]** |
-| `holdoutprot` (SKEMPI curators' own groups, 159 groups) | 0% | 0.579 | 0.524 | **+0.055 [+0.021, +0.088]** |
+| split | external leakage | reader | head | reader − head | **pair block alone** |
+|---|---|---|---|---|---|
+| `rdenet` (what the field uses, grouped by PDB id) | 56% | 0.604 – 0.626 | 0.589 | +0.015 [−0.023, +0.055] | 0.589 |
+| `hom99` (ours, 99% chain identity, 127 groups) | not measured | 0.573 | 0.505 | **+0.068 [+0.030, +0.109]** | **0.578** |
+| `holdoutprot` (SKEMPI curators' own groups, 159 groups) | 0% | 0.579 | 0.524 | **+0.055 [+0.021, +0.088]** | **0.576** |
+| `ppiformer` (PPIRef's similarity-aware split) | — | — | — | — | 0.573 |
+
+The last column is 128 features; the `reader` column is 295,040. On the leaked split the
+sequence blocks are worth a significant +0.038 and the pair block alone lands exactly on
+the head; under homology control the pair block is indistinguishable from the full reader
+and well clear of the head. `block_ablation.py` and `pair_block.py` produce these, and
+`docs/FAMILY_SPLIT.md` reports the same finding arrived at independently on the mmCSM-PPI
+cohort under a leave-one-family-out split.
 
 Leakage percentages are Bushuiev et al.'s iAlign measurements of these splits, not ours.
 The `rdenet` reader entry is a range, not a point, and the difference beside it is
@@ -239,6 +256,8 @@ elsewhere:
 | `prefold_probe/splits.py` | fold assignments |
 | `prefold_probe/spec.py` | what the model is and which measurement settled each choice |
 | `reproduce.py` | fit on the released pickles and print the penalty curve |
+| `block_ablation.py` | refit on block subsets; which of the three blocks generalises |
+| `pair_block.py` | extract the 128-wide pair block once (2.6 MiB) and score it on all four splits |
 | `RESULTS.md` | the full record, with the experiment behind every number |
 | `docs/PROVENANCE.md` | which files every number is fitted on, with hashes, and what may be added to the cohort |
 | `docs/SELECTION.md` | how the penalty is chosen, four rules compared, and the two things that are not settled |

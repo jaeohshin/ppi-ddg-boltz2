@@ -62,6 +62,56 @@ Branch ablation on a frozen head, replacing one branch by its mean (09-20):
 58.3M of the head's 58.4M parameters sit in the two flattening layers that read `wsi` and
 `ws`. The 128 numbers of `wz` carry most of the signal.
 
+### 3.1b Which block generalises (11-15)
+
+Section 3.1's branch ablation removed one branch from a frozen head. This refits the
+reader from scratch on block subsets, so each arm gets its own penalty curve rather than
+being judged with the full model's. Per fold the three per-block Grams are computed once
+and every arm is a subset sum, so the five arms cost one pass over the features
+(`block_ablation.py`; `pair_block.py` extends the penalty grid for the 128-wide arm,
+whose optimum sat above the shared grid's ceiling).
+
+Best per-structure PCC on each arm's own curve:
+
+| arm | width | `rdenet` | `hom99` | `holdoutprot` | `ppiformer` |
+|---|---|---|---|---|---|
+| `all` | 295,040 | 0.6264 | 0.5733 | 0.5788 | — |
+| **`wz`** | **128** | 0.5890 | **0.5784** | 0.5759 | 0.5731 |
+| `seq` (`wsi`+`ws`) | 294,912 | 0.5604 | 0.4519 | 0.4915 | — |
+| `ws` | 147,456 | 0.5583 | 0.4496 | 0.4882 | — |
+| `wsi` | 147,456 | 0.3261 | 0.2993 | 0.3059 | — |
+
+Paired over complexes, 10,000 draws, `wz` against `all` on identical rows and folds:
+
+| split | external leakage | `wz` − `all` | 95% CI |
+|---|---|---|---|
+| `rdenet` | 56% | **−0.0383** | [−0.0725, −0.0036] |
+| `hom99` | not measured | +0.0051 | [−0.0111, +0.0228] |
+| `holdoutprot` | 0% | −0.0040 | [−0.0405, +0.0369] |
+
+**The 294,912 sequence dimensions are worth a significant +0.038 on the leaked split and
+nothing distinguishable from zero on either controlled one.** That is the signature of
+recall, not of representation: they pay when a near neighbour of the test complex is in
+training and not otherwise. It also accounts for most of the `rdenet`-to-`hom99` drop —
+0.038 of the reader's 0.053.
+
+Two further readings:
+
+- **`wsi` is nearly inert.** Alone it reaches 0.30–0.33 against `ws`'s 0.45–0.56 at
+  identical width, and `seq` (0.4519 on `hom99`) is within 0.002 of `ws` alone (0.4496):
+  adding 147,456 numbers to `ws` changes nothing. Section 3.1's frozen-head ablation
+  agreed in rank (`wz` −0.085, `ws` −0.046, `wsi` −0.025) but could not show that the
+  third block is dispensable, because it never refitted without it.
+- **The 128-wide arm wants a much heavier ridge**: optimal alpha 56 on `rdenet`, 100 on
+  `hom99` and `ppiformer`, 562 on `holdoutprot`, against 1–31.6 for the full reader. The
+  original 13-point grid stopped at 1,000 with the `holdoutprot` curve still rising, which
+  is why `pair_block.py` sweeps to 10^7 and asserts the argmax is interior.
+
+So the model to report for any claim about a new complex or a new family is a ridge on 128
+frozen pair-block numbers. The same conclusion was reached independently on the mmCSM-PPI
+cohort under leave-one-family-out (`docs/FAMILY_SPLIT.md`), where dropping the sequence
+blocks cost 0.0011 Pearson.
+
 ### 3.2 The block penalty
 
 Reading the three blocks under one shared ridge penalty scores about 0.53; the two large
