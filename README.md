@@ -240,6 +240,7 @@ elsewhere:
 | `prefold_probe/spec.py` | what the model is and which measurement settled each choice |
 | `reproduce.py` | fit on the released pickles and print the penalty curve |
 | `RESULTS.md` | the full record, with the experiment behind every number |
+| `docs/PROVENANCE.md` | which files every number is fitted on, with hashes, and what may be added to the cohort |
 
 ## A second baseline: `mmcsm-ppi/`
 

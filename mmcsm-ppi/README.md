@@ -234,7 +234,7 @@ forgotten.
 | | why it was left |
 |---|---|
 | **A split by complex, not by mutation count** | the comparison above is fair but neither model is tested on an unseen complex. Refitting both on a complex-level or family-level split is the experiment that would show whether the margin survives |
-| **Closing the cohort** | diagnosed below. Six rows are recoverable now; 110 need 118 structures folded; two are blocked on a defect in SKEMPI itself |
+| **Closing the cohort** | diagnosed below. Six rows are recoverable now; 110 need 118 structures folded; two are blocked on a defect in SKEMPI itself. Folding is not a free operation: the fitted features are the PreFold-dG authors' released pickles, so new local features would be a second producer in one training set. [`docs/PROVENANCE.md`](../docs/PROVENANCE.md) gives the hashes, how far local re-folds agree, why cosine is not an acceptance test, and the held-out-features test to run first |
 | **A benchmark with new families in it** | done and reported above: only 7 of the 68 blind complexes are a family the training set never saw, carrying 19 rows. No protocol over these files can measure out-of-family transfer, because the data for it is not there. Testing that needs a different cohort |
 | **Scoring the training set's own cross-validation** | the paper reports CV1 0.87 (random 80/20), CV4 0.76 (leave-one-complex-out) and CV5 0.73 (leave-one-binding-site-out). The released `prediction_mmCSM-PPI` column on the training file is not identified as out-of-fold, so it cannot stand in for any of them |
 | **The abstract's 10-fold CV figure** | the abstract reports 0.75 / RMSE 1.64 under 10-fold CV. No such number appears in the body, whose closest entry is CV4 at 0.76 / 1.59. Unresolved |
