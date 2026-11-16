@@ -6,17 +6,23 @@ re-examination of the split it is measured on.
 **Claim.** The ΔΔG signal the PreFold-dG head exploits is linearly readable from the
 pooled Boltz-2 representations it is given. A ridge with one penalty scale per feature
 block matches the 58.4M-parameter head on the split the field uses, and significantly
-outperforms it once homology is controlled — on identical inputs, the same cohort and
-the same folds.
+outperforms it once homology is controlled — on identical inputs, the same cohort and the
+same folds. Of the 295,040 numbers it is handed, 128 do the work.
 
-**And it needs 128 of the 295,040 numbers.** Of the three blocks, only the 128-wide pair
-block `wz` generalises. Dropping both 147,456-wide sequence blocks costs
-−0.038 [−0.073, −0.004] per-structure PCC on the 56%-leaked split and nothing
-distinguishable from zero on either homology-controlled one: +0.005 [−0.011, +0.023] on
-`hom99`, −0.004 [−0.041, +0.037] on `holdoutprot`. The 294,912 sequence dimensions buy
-homology recall and nothing else that can be measured here. A closed-form ridge on 128
-frozen numbers beats the 58.4M-parameter head by +0.073 and +0.052 on the two controlled
-splits.
+## Where to read what
+
+This README is an overview. It is not the primary record of anything below.
+
+| | |
+|---|---|
+| `RESULTS.md` | the full record: every experiment in the order it was run, with the measurement that settled it, and a section for the ones withdrawn |
+| `docs/FAMILY_SPLIT.md` | the mmCSM-PPI comparison with similarity controlled — what the margin was worth, and which 128 features did the work |
+| `docs/PAIR_BLOCK.md` | inside the 128: four dimensions are enough, and the strong ones are copies of each other |
+| `docs/SELECTION.md` | how the penalty is chosen, four rules compared, and the two things that are not settled |
+| `docs/PROVENANCE.md` | which files every number is fitted on, with hashes, and what may be added to the cohort |
+| `reproduction/` | refitting on our own Boltz-2 inference instead of the authors' pickles, and what that test does and does not license |
+| `mmcsm-ppi/` | a separate, self-contained harness scoring any predictor against mmCSM-PPI, FoldX, Discovery Studio and ZEMu on the same rows |
+| `VERIFICATION.md` | what is checked before a number here is believed |
 
 ## Results
 
@@ -31,116 +37,57 @@ complexes.
 | `holdoutprot` (SKEMPI curators' own groups, 159 groups) | 0% | 0.579 | 0.524 | **+0.055 [+0.021, +0.088]** | **0.576** |
 | `ppiformer` (PPIRef's similarity-aware split) | — | — | — | — | 0.573 |
 
-The last column is 128 features; the `reader` column is 295,040. On the leaked split the
-sequence blocks are worth a significant +0.038 and the pair block alone lands exactly on
-the head; under homology control the pair block is indistinguishable from the full reader
-and well clear of the head. `block_ablation.py` and `pair_block.py` produce these, and
-`docs/FAMILY_SPLIT.md` reports the same finding arrived at independently on the mmCSM-PPI
-cohort under a leave-one-family-out split.
+The last column is 128 features; the `reader` column is 295,040. Subtracting it from the
+`head` column, a closed-form ridge on 128 frozen numbers beats the 58.4M-parameter head by
++0.073 on `hom99` and +0.052 on `holdoutprot`, and lands exactly on it on the leaked split.
+`RESULTS.md` §3.1b refits every block subset from scratch on its own penalty curve, and has
+the paired intervals against the full reader: the 294,912 sequence dimensions are worth a
+significant +0.038 on the leaked split and nothing distinguishable from zero on either
+controlled one. Leakage percentages are Bushuiev et al.'s iAlign measurements of these
+splits, not ours.
 
-Leakage percentages are Bushuiev et al.'s iAlign measurements of these splits, not ours.
-The `rdenet` reader entry is a range, not a point, and the difference beside it is
-measured at its lower end: two runs of the same procedure on the same inputs selected
-different penalties and landed at 0.604 and 0.626, which is the selection spread described
-below. They are two points on one curve — `reproduce.py` prints 0.6031 at alpha 31.6 and
-0.6264 at alpha 1 — and the difference quoted pairs the 0.604 run against the head's 0.589
-on the same complexes. The two controlled rows do not have this ambiguity; there each
-difference is the subtraction of the two columns beside it.
+**Read the controlled rows.** `rdenet` groups by PDB id, which is not enough: at 99% chain
+identity the cohort's 50 antibody–antigen PDB ids collapse to 22 independent clusters, one
+of them fourteen hen-lysozyme complexes. Under control both models fall, so the leakage is
+a property of split strictness in general rather than something specific to antibodies —
+but the head falls twice as far (−0.086 against the reader's −0.053). That is the finding:
+**the leakage was helping the larger model more.** The two controlled splits were built on
+unrelated principles and agree on the gap to within 0.013.
 
-**Read the controlled rows.** `rdenet` groups by PDB id, which is not enough: at 99%
-chain identity the cohort's 50 antibody–antigen PDB ids collapse to 22 independent
-clusters, one of them fourteen hen-lysozyme complexes. The same antibody sits on both
-sides of the split while the model is being fitted. Under control both models fall — so
-the leakage is a property of split strictness in general, not something specific to
-antibodies — but the head falls twice as far (−0.086 against the reader's −0.053). That
-is the finding: **the leakage was helping the larger model more.**
+The `rdenet` reader entry is a range because two runs of the same procedure on the same
+inputs selected different penalties and landed at 0.604 and 0.626. A single reader score
+carries about ±0.02 of penalty-selection noise; the difference does not. `docs/SELECTION.md`
+has why, and `RESULTS.md` §4 has the controlled refit in full.
 
-The two controlled splits were built on unrelated principles — ours by clustering chain
-sequences, the other by the SKEMPI curators' own `Hold_out_proteins` column, which
-PPIformer also used and which Bushuiev et al. measured at 0% leakage. They agree on the
-gap to within 0.013. `holdoutprot` is also the *looser* grouping of the two (159 groups
-against 127), so the gap is not an artefact of over-strict grouping either.
+The published numbers were reproduced from the released pickles before anything was
+compared to them — SKEMPI per-structure PCC 0.622 against 0.611 as printed, HER2 external
+test 0.546 [0.483, 0.606] against 0.524, with the paper's nine-entry homology exclusion
+re-derived from its Supplementary Fig. S1 rule. The published values lie inside our
+intervals, so this is a match, not a win. `RESULTS.md` §2 and §3.3.
 
-## Reproduction of the published numbers
-
-Before comparing anything, the published result had to be reproduced from the released
-pickles alone:
-
-| | this repository | PreFold-dG, as printed |
-|---|---|---|
-| SKEMPI per-structure PCC | 0.622 | 0.611 |
-| SKEMPI per-structure SRCC | 0.597 | 0.573 |
-| SKEMPI overall PCC | 0.744 | 0.750 |
-| HER2 external test, PCC | 0.546 [0.483, 0.606] | 0.524 |
-| HER2 external test, SRCC | 0.542 | 0.529 |
-
-The HER2 protocol excludes nine SKEMPI entries homologous to HER2; that list was
-re-derived from the rule in the paper's Supplementary Fig. S1 (Smith-Waterman against the
-HER2 extracellular domain, BLOSUM62, gap open −12, extend −2, score above 350) and
-reproduces its Supplementary Table S4 exactly. The published values lie inside our
-interval, so this is a match, not a win — and the reader never sees HER2 at all, while
-the published protocol selects a stopping epoch on it.
-
-## How the reader works
+## The model
 
 Three blocks arrive glued together: `wsi` and `ws` at 147,456 numbers each, and `wz` at
 128. Fit one ridge penalty to that concatenation and the two large matrices decide the
-solution, burying `wz` — which is where most of the signal is. That costs about 0.09:
-
-| | per-structure PCC |
-|---|---|
-| one shared penalty over the concatenation | ~0.53 |
-| one penalty scale per block | 0.59 – 0.62 |
-
-The fix is three lines. Standardise each block on the training rows, form its Gram
-matrix, divide by the block's width, and sum:
+solution, burying `wz` — which is where most of the signal is. That costs about 0.09. The
+fix is three lines: standardise each block on the training rows, form its Gram matrix,
+divide by the block's width, and sum.
 
 ```python
 K = np.zeros((n, n))
 for X in (wsi, ws, wz):                 # mutant minus wild type, per block
     z = (X - X[train].mean(0)) / X[train].std(0)
     K += (z @ z.T) / X.shape[1]         # <- the whole trick
-```
 
-Then solve the dual once and read off every penalty from the same eigendecomposition:
-
-```python
 w, V = np.linalg.eigh(K[train][:, train])
 pred = K[test][:, train] @ (V @ ((V.T @ (y[train] - y[train].mean())) / (w + alpha))) + y[train].mean()
 ```
 
-That is the entire model. No seed, no epochs, no early stopping, no model selection: the
-same input and penalty give the same answer every time.
-
-An earlier reading of the block penalty — that it protects weak blocks from strong ones —
-was withdrawn. A control with a deliberately weak extra block showed the 0.049 is the
-cost of the single shared penalty itself.
-
-### Quote the gap, not a single score
-
-The inner penalty-selection surface is flat near its top: 0.006 across a 300-fold range
-of alpha, while the outer consequence of the choice is ten times larger. Nested
-cross-validation makes it worse, because its inner folds train on 53% of the data against
-the outer 67%, biasing selection toward over-regularisation. Three nominally identical
-runs selected three different penalty sets and landed between 0.604 and 0.622.
-
-So the reader's absolute score carries about ±0.02 of selection noise, and this
-repository reports the whole penalty curve rather than a selected point. The
-reader-minus-head difference does not have that problem: on `holdoutprot` it is positive
-with intervals clearing zero at every grid point from alpha 1 to 1000.
-
-### Verified against the reference implementation
-
-`reproduce.py` in this repository, run on the released pickles, reproduces the working
-repository's reference solver across the whole penalty grid:
-
-| split | this repository | reference | penalty |
-|---|---|---|---|
-| `rdenet` | 0.6264 | 0.6264 | alpha 1 |
-| `holdoutprot` | 0.5788 | 0.579 | alpha 10 |
-
-All thirteen grid points agree to four decimal places on `rdenet`. The run takes under two
-minutes on 14 cores once the pickles are loaded.
+That is the entire model: one eigendecomposition serves the whole penalty grid. No seed,
+no epochs, no early stopping — the same input and penalty give the same answer every time.
+`reproduce.py` matches the working repository's reference solver to four decimal places at
+all thirteen grid points on `rdenet`. `RESULTS.md` §3.2 has the block-penalty experiment,
+including an earlier reading of it that was withdrawn.
 
 ## Install
 
@@ -159,9 +106,9 @@ python reproduce.py --pickles <dir> --split holdoutprot
 python -m prefold_probe.spec          # what the model is, and the experiment behind each choice
 ```
 
-About 25 GB of RAM: the two 147,456-wide blocks are 6.8 GB in float32 for the full
-cohort, and the kernel is formed in float64 because these representations have column
-means large relative to their spread, and a float32 accumulation moves the third decimal.
+About 25 GB of RAM: the two 147,456-wide blocks are 6.8 GB in float32 for the full cohort,
+and the kernel is formed in float64 because these representations have column means large
+relative to their spread, and a float32 accumulation moves the third decimal.
 
 ## What the reader is given
 
@@ -171,32 +118,36 @@ means large relative to their spread, and a float32 accumulation moves the third
 | Used | the mutant-minus-wild-type difference of `wsi`, `ws` and `wz` |
 | Never used | a sequence model, an inverse-folding model, any structure beyond what Boltz-2 already pooled, HER2 at any point during fitting |
 
-The label is `log10(Kd_mutant in nM) − log10(Kd_wild-type in nM)`, not kcal/mol — the
-upstream code never converts, so published MAE and RMSE are in label units. Multiply by
-1.364 for energies.
+Two things to know about the inputs. The label is
+`log10(Kd_mutant in nM) − log10(Kd_wild-type in nM)`, not kcal/mol — the upstream code
+never converts, so published MAE and RMSE are in label units; multiply by 1.364 for
+energies. And this repository reproduces the published loader's pairing exactly, including
+its one known defect: it pairs a mutant with the first wild-type record sharing its
+four-letter PDB id, so 35 variants in 2C5D, 3SE3 and 3SE4 carry the wrong wild type.
+Keeping it is deliberate — fixing it would make these numbers incomparable with the
+published ones.
 
-This repository reproduces the published loader's pairing exactly, including its one
-known defect: it pairs a mutant with the first wild-type record sharing its four-letter
-PDB id, so 35 variants in 2C5D, 3SE3 and 3SE4 carry the wrong wild type. Keeping it is
-deliberate — fixing it would make these numbers incomparable with the published ones.
+## How to read the numbers here
 
-## What did not work
+Rules this project arrived at the hard way; every point estimate believed without them was
+later overturned.
 
-Measured, not abandoned early. Per-structure PCC is the figure of merit, and every
-difference carries a paired complex-level bootstrap.
+- Per-structure PCC is interpretable only on the full cohort, where 116 complexes carry ten
+  or more variants. Subset ablations report pcc / srcc / mae instead.
+- Every difference comes with a paired bootstrap **over complexes**. Resampling variants
+  holds the complex set fixed and understates the spread.
+- A score on `rdenet` includes 56% leakage. Generalisation claims belong to `hom99` or
+  `holdoutprot`.
+- A single reader score carries ±0.02 of penalty-selection noise. Quote the gap.
 
-| approach | outcome |
-|---|---|
-| ESM-2 650M as an extra block | 0.596 against 0.615 for the reader alone; not significant |
-| Pythia-PPI predictions as a block | 0.587 against 0.593; output averaging 0.591; not significant |
-| richer inputs from the saved Boltz traces | response-ranked interface edges, distance shells, earlier blocks: at most +0.01 over a reader that reads all three tensors properly |
-| other Pairformer layers and recycles | 88 snapshots scanned; flat after recycle 3–4; best +0.005 [−0.019, +0.031] over the final one |
-| a nonlinear head on the same input | MLP minus ridge −0.002 [−0.021, +0.017] on the full data |
-| head capacity, 0.1M to 58.4M parameters | every variant scores below the reader. A finite tuning grid cannot prove the converse, so the head grid was deliberately left unrun |
-| combining with Pythia-PPI | residual correlation 0.765 — the two families fail on the same variants — and a gate that picks the better model per variant is not learnable (accuracy 0.47 against a 0.50 base rate) |
-| distillation from a teacher's soft labels | +0.011 [+0.004, +0.018]; real but a regularisation effect |
+## What is closed, and what is open
 
-## Where this problem stands
+Eight alternatives were measured rather than abandoned early, each with a paired
+complex-level bootstrap: ESM-2 650M as an extra block, Pythia-PPI as a block or by output
+averaging, richer inputs from the saved Boltz traces, other Pairformer layers and recycles,
+a nonlinear head, head capacity from 0.1M to 58.4M parameters, combining with Pythia-PPI
+through a learned gate, and distillation from soft labels. None beats the reader by more
+than this cohort can resolve. `RESULTS.md` §5 lists every one with its interval.
 
 | route | status |
 |---|---|
@@ -205,29 +156,16 @@ difference carries a paired complex-level bootstrap.
 | fusing another learned representation | closed on this task: ESM-2 and Pythia-PPI each add nothing |
 | more experimental data | out of reach here: Hummer et al. estimate ≥90,000 measured ΔΔG values are needed for a test Pearson above 0.85. SKEMPI has 5,731 |
 
-Which leaves the representation itself. Everything here is frozen Boltz-2; nothing in
-this work tests what happens when the trunk is allowed to move.
+Which leaves the representation itself. Everything here is frozen Boltz-2; nothing in this
+work tests what happens when the trunk is allowed to move.
 
 One subset is worth naming separately. Antibody–antigen variants score 0.47 against 0.64
-for the rest, a gap of +0.17 to +0.18 that is not a composition artefact. Our pipeline is
-handed the wild-type crystal structure as a template, so the difficulty is not structural
-uncertainty. The candidate explanation is the representation: antibody CDRs are
-somatically hypermutated and carry little of the evolutionary covariation an MSA-consuming
-model relies on. That is cheap to test — correlate per-structure performance against MSA
-depth and Boltz-2 confidence — and has not been done.
-
-## How to read the numbers here
-
-Rules this project arrived at the hard way; every point estimate believed without them was
-later overturned.
-
-- Per-structure PCC is interpretable only on the full cohort, where 116 complexes carry
-  ten or more variants. Subset ablations report pcc / srcc / mae instead.
-- Every difference comes with a paired bootstrap **over complexes**. Resampling variants
-  holds the complex set fixed and understates the spread.
-- A score on `rdenet` includes 56% leakage. Generalisation claims belong to `hom99` or
-  `holdoutprot`.
-- A single reader score carries ±0.02 of penalty-selection noise. Quote the gap.
+for the rest, a gap that is not a composition artefact, and our pipeline is handed the
+wild-type crystal structure as a template, so the difficulty is not structural uncertainty.
+The candidate explanation is the representation: antibody CDRs are somatically hypermutated
+and carry little of the evolutionary covariation an MSA-consuming model relies on. That is
+cheap to test — per-structure performance against MSA depth and Boltz-2 confidence — and
+has not been done. `RESULTS.md` §4.1 and §7.
 
 ## Data
 
@@ -245,7 +183,7 @@ elsewhere:
 | `data/split/holdoutprot.csv` | three folds by GroupKFold over SKEMPI 2.0's `Hold_out_proteins`, 159 groups |
 | `data/split/rdenet.csv`, `ppiformer.csv` | the published splits, for comparison |
 
-## Repository layout
+## Code
 
 | path | contents |
 |---|---|
@@ -259,34 +197,26 @@ elsewhere:
 | `block_ablation.py` | refit on block subsets; which of the three blocks generalises |
 | `pair_block.py` | extract the 128-wide pair block once (2.6 MiB) and score it on all four splits |
 | `pair_block_dimensions.py` | how many of the 128 carry the signal, with the ranking recomputed per fold |
-| `reproduction/` | the producer-swap test: refit on local Boltz output instead of the authors' pickles |
-| `RESULTS.md` | the full record, with the experiment behind every number |
-| `docs/PROVENANCE.md` | which files every number is fitted on, with hashes, and what may be added to the cohort |
-| `docs/SELECTION.md` | how the penalty is chosen, four rules compared, and the two things that are not settled |
-| `docs/FAMILY_SPLIT.md` | the same comparison with similarity controlled: what the margin was worth, and which 128 features did the work |
-| `docs/PAIR_BLOCK.md` | inside the 128: four dimensions are enough, and the strong ones are copies of each other |
+
+The import path is `prefold_probe`, from the repository's earlier name.
 
 ## A second baseline: `mmcsm-ppi/`
 
-`mmcsm-ppi/` is a separate, self-contained harness for a different published method —
-mmCSM-PPI (Rodrigues, Pires & Ascher, *NAR* 2021), which predicts the effect of *multiple*
-point mutations from structure-based signatures rather than from a foundation model. It
-scores any predictor against mmCSM-PPI, FoldX, Discovery Studio and ZEMu on the same rows,
-using the predictions shipped inside the authors' own released files, so nothing has to be
-reimplemented. Its README carries the full comparison and what the released files actually contain. On
-mmCSM-PPI's own 595-mutation blind set, the block-penalised ridge scores Pearson 0.865 and
-RMSE 1.44 kcal/mol against mmCSM-PPI's 0.687 and 2.06 — a paired difference of +0.163
-[+0.062, +0.351] over 66 complexes — and a trained network on the same features does not
-beat it there either. The third decimal of that 0.865 is penalty-selection noise rather
-than a property of the model, which its README measures and quantifies.
+`mmcsm-ppi/` scores any predictor against mmCSM-PPI (Rodrigues, Pires & Ascher, *NAR*
+2021), which predicts the effect of *multiple* point mutations from structure-based
+signatures rather than from a foundation model. It uses the predictions shipped inside the
+authors' own released files, so nothing has to be reimplemented. On mmCSM-PPI's own
+595-mutation blind set the ridge scores Pearson 0.865 against 0.687, a paired difference of
++0.163 [+0.062, +0.351] over 66 complexes.
 
-That margin is a property of the split, though, and the split is lenient: 516 of the 586
-scorable rows sit on complexes the training release contains. Refitted leave-one-family-out
-over all 34 families, the ridge falls to 0.555 against mmCSM-PPI's 0.702 on the same rows,
-and since mmCSM-PPI saw every held-out family while the ridge did not, the difference is
-undetermined rather than a loss. The same run showed that only the 128-wide pair block
-generalises: dropping both 147,456-wide sequence blocks costs 0.0011 Pearson once the
-family is new. `docs/FAMILY_SPLIT.md` has it. The two halves of this repository share no code and no cohort.
+That margin is a property of the split, and the split is lenient: 516 of the 586 scorable
+rows sit on complexes the training release contains. Refitted leave-one-family-out, the
+ridge falls to 0.555 against mmCSM-PPI's 0.702 — but mmCSM-PPI saw every held-out family
+while the ridge did not, so the difference is undetermined rather than a loss. The same run
+showed that only the pair block generalises: dropping both 147,456-wide sequence blocks
+costs 0.0011 Pearson once the family is new. `docs/FAMILY_SPLIT.md` has it, and
+`mmcsm-ppi/README.md` has the full comparison and what the released files actually contain.
+The two halves of this repository share no code and no cohort.
 
 ## Citation
 
