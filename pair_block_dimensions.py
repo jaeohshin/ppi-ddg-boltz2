@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """How many of the 128 pair-block dimensions carry the signal, and are they distinct?
 
-    python pair_block_dimensions.py          # needs pair_block.npz from pair_block.py
+    python pair_block_dimensions.py                       # ./pair_block.npz
+    python pair_block_dimensions.py --cache path/to/x.npz
 
 Ranks dimensions by their own within-complex PCC, recomputed inside every
 training fold, refits the top k, and bootstraps k=4 and k=1 against all 128.
@@ -10,7 +11,9 @@ through selection over 128 candidates.  Also prints the correlation structure of
 the strongest dimensions, which is where the participation ratio of 1.9 comes
 from.  See docs/PAIR_BLOCK.md.
 """
+import argparse
 import json
+from pathlib import Path
 
 import numpy as np
 
@@ -18,8 +21,16 @@ from scipy import stats
 from prefold_probe.evaluate import per_structure_pcc, paired_bootstrap
 from prefold_probe.reader import BlockRidge, _block_gram
 from prefold_probe.splits import load_split
-S=''  # pair_block.npz in the working directory
-d=np.load(S+'pair_block.npz',allow_pickle=True)
+_ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+_ap.add_argument('--cache', type=Path, default=Path('pair_block.npz'),
+                 help='the 128-wide pair block written by pair_block.py --cache')
+_ap.add_argument('--out', type=Path, default=Path('nested128.json'))
+_args = _ap.parse_args()
+if not _args.cache.exists():
+    raise SystemExit(
+        f'{_args.cache} not found.\n'
+        f'  Build it first:  python pair_block.py --pickles <dir> --cache {_args.cache}')
+d=np.load(_args.cache,allow_pickle=True)
 wz,y_all,pdbs_all=d['wz'],d['y'],d['pdbs']
 ALPHAS=tuple(np.logspace(-2,5,29)); KS=(1,2,4,8,16,32,64,128)
 out={}
@@ -68,4 +79,5 @@ print("      "+" ".join("%6d"%t for t in top))
 for i,t in enumerate(top): print("%5d "%t+" ".join("%+6.2f"%C[i,j] for j in range(len(top))))
 sv=np.linalg.svd(Z,compute_uv=False)
 print("participation ratio of just these 8: %.2f"%(((sv**2).sum()**2)/(sv**4).sum()))
-json.dump(out,open('nested128.json','w'),indent=1,default=float)
+json.dump(out,open(_args.out,'w'),indent=1,default=float)
+print(f'wrote {_args.out}')

@@ -21,6 +21,7 @@ from pathlib import Path
 import numpy as np
 
 from prefold_probe.cohort import build_cohort
+from prefold_probe.inputs import verify as verify_inputs
 from prefold_probe.evaluate import per_structure_pcc, per_structure_srcc
 from prefold_probe.features import difference_blocks
 from prefold_probe.reader import BlockRidge, kernel
@@ -39,7 +40,13 @@ def main() -> None:
                     help="directory holding skempi_mut.pkl and skempi_wt.pkl")
     ap.add_argument("--split", default="rdenet")
     ap.add_argument("--out", type=Path, default=Path("reader_scores.json"))
+    ap.add_argument("--verify-digest", action="store_true",
+                    help="hash the pickles against docs/PROVENANCE.md as well as "
+                         "checking their size; about half a minute for 6.8 GB")
     args = ap.parse_args()
+
+    log("checking the inputs against docs/PROVENANCE.md")
+    verify_inputs(args.pickles, digest=args.verify_digest, log=log)
 
     import joblib
     log("loading pickles")

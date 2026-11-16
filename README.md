@@ -57,6 +57,7 @@ This README is an overview. It is not the primary record of anything below.
 | `docs/PAIR_BLOCK.md` | inside the 128: four dimensions are enough, and the strong ones are copies of each other |
 | `docs/SELECTION.md` | how the penalty is chosen, four rules compared, and the two things that are not settled |
 | `docs/PROVENANCE.md` | which files every number is fitted on, with hashes, and what may be added to the cohort |
+| [head_predictions/README.md](head_predictions/README.md) | the head's out-of-fold predictions, why they are committed, and the aggregation the Results table uses |
 | `reproduction/` | refitting on our own Boltz-2 inference instead of the authors' pickles, and what that test does and does not license |
 | `mmcsm-ppi/` | a separate, self-contained harness scoring any predictor against mmCSM-PPI, FoldX, Discovery Studio and ZEMu on the same rows |
 | `VERIFICATION.md` | what is checked before a number here is believed |
@@ -73,6 +74,24 @@ complexes.
 | `hom99` (ours, 99% chain identity, 127 groups) | not measured | 0.573 | 0.505 | **+0.068 [+0.030, +0.109]** | **0.578** |
 | `holdoutprot` (SKEMPI curators' own groups, 159 groups) | 0% | 0.579 | 0.524 | **+0.055 [+0.021, +0.088]** | **0.576** |
 | `ppiformer` (PPIRef's similarity-aware split) | — | — | — | — | 0.573 |
+
+Every row of this table can be recomputed from the repository and the released pickles.
+`python compare.py --pickles <dir> --split holdoutprot` fits the reader, scores the head
+from its stored out-of-fold predictions, and reports the difference with its paired
+interval at every penalty in the grid. Run on all three splits it returns this table:
+
+| split | reader | recomputed | difference | recomputed |
+|---|---|---|---|---|
+| `rdenet` | 0.604 | 0.6031 at alpha 31.6 | +0.015 [−0.023, +0.055] | +0.0138 [−0.0236, +0.0539] |
+| `hom99` | 0.573 | 0.5733 at alpha 31.6 | +0.068 [+0.030, +0.109] | +0.0684 [+0.0295, +0.1088] |
+| `holdoutprot` | 0.579 | 0.5788 at alpha 10 | +0.055 [+0.021, +0.088] | +0.0553 [+0.0212, +0.0877] |
+
+The reports are in `docs/comparison_*.json`. Two details the table above cannot show and
+`compare.py` does. The `head` column is the **three-seed ensemble** of the stored
+predictions — averaged, then scored once — which runs 0.002 to 0.008 above the mean of
+the three seeds' own scores; both are printed. And the claim below that the difference on
+`holdoutprot` holds at every penalty from alpha 1 to 1000 is checked there: it does, at
+all seven, while on `rdenet` no penalty in the grid gives an interval clearing zero.
 
 The last column is 128 features; the `reader` column is 295,040. Subtracting the
 `head` column from it, a closed-form ridge on 128 frozen numbers beats the 58.4M-parameter
@@ -141,7 +160,8 @@ hundred lines.
 
 ```bash
 python reproduce.py --pickles <dir with skempi_{mut,wt}.pkl> --split rdenet
-python reproduce.py --pickles <dir> --split holdoutprot
+python reproduce.py --pickles <dir> --split holdoutprot --verify-digest
+python compare.py   --pickles <dir> --split holdoutprot   # reader vs head, with the gap
 python -m prefold_probe.spec          # what the model is, and the experiment behind each choice
 ```
 
@@ -153,7 +173,7 @@ relative to their spread, and a float32 accumulation moves the third decimal.
 
 | | |
 |---|---|
-| Required | `skempi_mut.pkl` and `skempi_wt.pkl` as released by the PreFold-dG authors, and a `PDB,fold` split file |
+| Required | `skempi_mut.pkl` and `skempi_wt.pkl` as released by the PreFold-dG authors, and a `PDB,fold` split file. Both pickles are pinned by size and sha256 in `docs/PROVENANCE.md`; `reproduce.py` checks the sizes on every run, and the digests with `--verify-digest` |
 | Used | the mutant-minus-wild-type difference of `wsi`, `ws` and `wz` |
 | Never used | a sequence model, an inverse-folding model, any structure beyond what Boltz-2 already pooled, HER2 at any point during fitting |
 
@@ -238,6 +258,8 @@ elsewhere:
 | `block_ablation.py` | refit on block subsets; which of the three blocks generalises |
 | `pair_block.py` | extract the 128-wide pair block once (2.6 MiB) and score it on all four splits |
 | `pair_block_dimensions.py` | how many of the 128 carry the signal, with the ranking recomputed per fold |
+| `compare.py` | recompute the whole Results table: reader, head, the difference and its interval |
+| `head_predictions/` | the head's out-of-fold predictions, three splits x three seeds, so the column it is compared against is checkable |
 
 The import path is `prefold_probe`, from the repository's earlier name.
 

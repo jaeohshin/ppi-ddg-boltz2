@@ -1,0 +1,160 @@
+{
+ "split": "hom99",
+ "n_variants": 5731,
+ "n_complexes_scored": 116,
+ "n_dropped_from_fit": 0,
+ "head_ensemble": {
+  "per_structure_pcc": 0.5049178035713298,
+  "per_structure_srcc": 0.4731630380449192
+ },
+ "head_per_seed_pcc": {
+  "42": 0.5045684394597889,
+  "1337": 0.5038923398012437,
+  "2024": 0.5005466775203523
+ },
+ "head_seed_mean_pcc": 0.5030024855937949,
+ "head_seed_sd_pcc": 0.001758317881245379,
+ "penalty_curve": [
+  {
+   "alpha": 0.001,
+   "reader_per_structure_pcc": 0.4094069635965103,
+   "delta": -0.09551083997481946,
+   "ci95": [
+    -0.14475161419219104,
+    -0.04441876156155773
+   ],
+   "interval_excludes_zero": false
+  },
+  {
+   "alpha": 0.0031622776601683794,
+   "reader_per_structure_pcc": 0.43066587000662154,
+   "delta": -0.07425193356470822,
+   "ci95": [
+    -0.12247016130153908,
+    -0.024679797416663322
+   ],
+   "interval_excludes_zero": false
+  },
+  {
+   "alpha": 0.01,
+   "reader_per_structure_pcc": 0.45761045769521425,
+   "delta": -0.047307345876115514,
+   "ci95": [
+    -0.09562016001626696,
+    0.0013848343130189505
+   ],
+   "interval_excludes_zero": false
+  },
+  {
+   "alpha": 0.03162277660168379,
+   "reader_per_structure_pcc": 0.4850392925681287,
+   "delta": -0.019878511003201038,
+   "ci95": [
+    -0.06862415478424004,
+    0.028056187846268833
+   ],
+   "interval_excludes_zero": false
+  },
+  {
+   "alpha": 0.09999999999999999,
+   "reader_per_structure_pcc": 0.5079212497789496,
+   "delta": 0.003003446207619831,
+   "ci95": [
+    -0.04289802895942735,
+    0.04755938258061867
+   ],
+   "interval_excludes_zero": false
+  },
+  {
+   "alpha": 0.31622776601683794,
+   "reader_per_structure_pcc": 0.5279517143767538,
+   "delta": 0.02303391080542405,
+   "ci95": [
+    -0.018163564728620643,
+    0.062263735472427056
+   ],
+   "interval_excludes_zero": false
+  },
+  {
+   "alpha": 1.0,
+   "reader_per_structure_pcc": 0.5445910578929275,
+   "delta": 0.03967325432159774,
+   "ci95": [
+    0.001947240241190371,
+    0.07530353402016955
+   ],
+   "interval_excludes_zero": true
+  },
+  {
+   "alpha": 3.162277660168379,
+   "reader_per_structure_pcc": 0.5567082909477652,
+   "delta": 0.051790487376435435,
+   "ci95": [
+    0.015794894637107388,
+    0.08640826305286889
+   ],
+   "interval_excludes_zero": true
+  },
+  {
+   "alpha": 10.0,
+   "reader_per_structure_pcc": 0.5689752465027674,
+   "delta": 0.06405744293143767,
+   "ci95": [
+    0.02737124369987694,
+    0.10079335431567786
+   ],
+   "interval_excludes_zero": true
+  },
+  {
+   "alpha": 31.622776601683796,
+   "reader_per_structure_pcc": 0.5733172816115307,
+   "delta": 0.06839947804020097,
+   "ci95": [
+    0.029467275472911416,
+    0.10879409074595847
+   ],
+   "interval_excludes_zero": true
+  },
+  {
+   "alpha": 100.0,
+   "reader_per_structure_pcc": 0.5712552375481382,
+   "delta": 0.06633743397680847,
+   "ci95": [
+    0.027575823642344753,
+    0.10774064749748669
+   ],
+   "interval_excludes_zero": true
+  },
+  {
+   "alpha": 316.2277660168379,
+   "reader_per_structure_pcc": 0.5711101667813021,
+   "delta": 0.06619236320997235,
+   "ci95": [
+    0.02888610679893837,
+    0.10768934498230609
+   ],
+   "interval_excludes_zero": true
+  },
+  {
+   "alpha": 1000.0,
+   "reader_per_structure_pcc": 0.5712553908248879,
+   "delta": 0.0663375872535581,
+   "ci95": [
+    0.026041117036526392,
+    0.1095779735948749
+   ],
+   "interval_excludes_zero": true
+  }
+ ],
+ "best_reader": {
+  "alpha": 31.622776601683796,
+  "reader_per_structure_pcc": 0.5733172816115307,
+  "delta": 0.06839947804020097,
+  "ci95": [
+   0.029467275472911416,
+   0.10879409074595847
+  ],
+  "interval_excludes_zero": true
+ },
+ "n_penalties_with_interval_excluding_zero": 7
+}
