@@ -5,42 +5,46 @@ re-examination of the split it is measured on.
 
 ## What this found
 
-Everything below is measured on identical inputs, the same cohort and the same folds, with
-the 58.4M-parameter head refitted from scratch under every split it is scored on.
+Every comparison below uses identical inputs, the same cohort and the same folds, with the
+58.4M-parameter head refitted from scratch under each split it is scored on.
 
-**1. The head's 58.4M parameters buy nothing that a linear read of its own input does not
-already have.** A closed-form ridge matches it on the split the field uses
-(+0.015 [−0.023, +0.055]) and beats it once homology is controlled: +0.068 [+0.030, +0.109]
-on `hom99`, +0.055 [+0.021, +0.088] on `holdoutprot`. It also matches the head on the
-published HER2 external test (0.546 [0.483, 0.606] against 0.524) and on the absolute-ΔG
-task — and it never sees HER2 at any point, while the published protocol selects a
-stopping epoch on it.
+**1. The 58.4M-parameter head is no more accurate than a linear read of the features it is
+given.** A closed-form ridge on those same features scores the same as the head on
+`rdenet`, the split this field uses (+0.015 [−0.023, +0.055]), and higher once homology is
+controlled: +0.068 [+0.030, +0.109] on `hom99` and +0.055 [+0.021, +0.088] on
+`holdoutprot`. It also equals the head on the published HER2 external test
+(0.546 [0.483, 0.606] against 0.524) and on the absolute-ΔG task, having never seen HER2 at
+any point, while the published protocol chooses its stopping epoch on it.
 
-**2. What looked like the head's advantage was split leakage.** Under control *both* models
-fall — so this is about split strictness in general, not about any one subset — but the head
-falls twice as far, −0.086 against the reader's −0.053. The published numbers reproduce, so
-the performance is real; what does not hold is the attribution. Its source is the Boltz-2
-representation, not the head that reads it.
+**2. The head's apparent advantage came from leakage in the split.** `rdenet` groups
+variants by PDB id, which leaves near-identical complexes on both sides of the fold
+boundary. Control for that and *both* models lose accuracy — the problem is the split, not
+any one subset of the data — but the head loses twice as much, −0.086 against the ridge's
+−0.053. The published numbers themselves reproduce, so the reported accuracy is real. What
+does not survive is the explanation for it: the accuracy comes from the Boltz-2
+representation, not from the head that reads it.
 
-**3. 128 of the 295,040 numbers do the work, and four dimensions of those 128 are enough.**
-The 294,912 sequence dimensions are worth a significant +0.038 on the leaked split and
-nothing distinguishable from zero on either controlled one — homology recall, not
-representation.
+**3. Of the 295,040 features, 128 carry the signal, and four directions within those 128
+are enough to recover it.** Removing the two 147,456-wide sequence blocks costs 0.038 on
+the leaked split and nothing measurable on either controlled split. Those blocks help only
+when a close relative of the test complex sits in the training set — that is retrieval of a
+known answer, not a model of the interaction.
 
-**4. Neither model generalises well to a genuinely new protein family.** Refitted
-leave-one-family-out on the mmCSM-PPI cohort, the ridge falls to 0.555. The advantage under
-control is the reader *degrading less*, not the reader being good. Absolute performance on
-unseen families remains an open problem for both.
+**4. Neither model predicts a genuinely new protein family well.** Refitted
+leave-one-family-out on the mmCSM-PPI cohort, the ridge drops to 0.555. So the controlled
+splits show that the ridge *loses less* accuracy than the head, not that it handles new
+families well. Doing that remains an open problem for both models.
 
-**5. So the limit here is split strictness and the representation, not model capacity.**
-Head capacity from 0.1M to 58.4M parameters, a nonlinear head, ESM-2 as an extra block and
-richer inputs from the saved Boltz traces are all closed, each with a paired interval.
+**5. What limits accuracy here is how strictly the data is split and what the representation
+contains — not the size of the model.** Head capacity from 0.1M to 58.4M parameters, a
+nonlinear head, ESM-2 as an additional block, and richer inputs extracted from the saved
+Boltz traces were each tested against a paired interval, and none of them helped.
 
-This is a property of the field rather than of one paper. The PreFold-dG authors were
-careful by the standards of this literature — they excluded nine HER2-homologous entries by
-Smith-Waterman before their external test, which others using the same test set do not —
-while a survey of this literature found no paper reporting a linear or trivial baseline as a
-control at all. `RESULTS.md` §7 has that reasoning and what follows from it.
+None of this is a flaw in one paper. The PreFold-dG authors were careful by the standards
+of this literature: they excluded nine HER2-homologous entries by Smith-Waterman before
+their external test, which other work on the same test set does not do. Meanwhile a survey
+of the literature turned up no paper at all that reports a linear or otherwise trivial
+baseline as a control. `RESULTS.md` §7 sets out that reasoning and what follows from it.
 
 ## Where to read what
 
@@ -70,13 +74,13 @@ complexes.
 | `holdoutprot` (SKEMPI curators' own groups, 159 groups) | 0% | 0.579 | 0.524 | **+0.055 [+0.021, +0.088]** | **0.576** |
 | `ppiformer` (PPIRef's similarity-aware split) | — | — | — | — | 0.573 |
 
-The last column is 128 features; the `reader` column is 295,040. Subtracting it from the
-`head` column, a closed-form ridge on 128 frozen numbers beats the 58.4M-parameter head by
-+0.073 on `hom99` and +0.052 on `holdoutprot`, and lands exactly on it on the leaked split.
-`RESULTS.md` §3.1b refits every block subset from scratch on its own penalty curve, and has
-the paired intervals against the full reader: the 294,912 sequence dimensions are worth a
-significant +0.038 on the leaked split and nothing distinguishable from zero on either
-controlled one. Leakage percentages are Bushuiev et al.'s iAlign measurements of these
+The last column is 128 features; the `reader` column is 295,040. Subtracting the
+`head` column from it, a closed-form ridge on 128 frozen numbers beats the 58.4M-parameter
+head by +0.073 on `hom99` and +0.052 on `holdoutprot`, and ties with it on the leaked
+split. `RESULTS.md` §3.1b refits every block subset from scratch on its own penalty curve
+and gives the paired intervals against the full reader: removing the 294,912 sequence
+dimensions costs 0.038 on the leaked split and nothing measurable on either controlled
+one. Leakage percentages are Bushuiev et al.'s iAlign measurements of these
 splits, not ours.
 
 **Why `rdenet` is not enough.** It groups by PDB id, and at 99% chain identity the
@@ -90,7 +94,8 @@ over-strict grouping.
 
 The `rdenet` reader entry is a range because two runs of the same procedure on the same
 inputs selected different penalties and landed at 0.604 and 0.626. A single reader score
-carries about ±0.02 of penalty-selection noise; the difference does not. `docs/SELECTION.md`
+carries about ±0.02 of penalty-selection noise; the reader-minus-head difference does not.
+`docs/SELECTION.md`
 has why, and `RESULTS.md` §4 has the controlled refit in full.
 
 The published numbers were reproduced from the released pickles before anything was
@@ -172,7 +177,8 @@ later overturned.
   holds the complex set fixed and understates the spread.
 - A score on `rdenet` includes 56% leakage. Generalisation claims belong to `hom99` or
   `holdoutprot`.
-- A single reader score carries ±0.02 of penalty-selection noise. Quote the gap.
+- A single reader score carries ±0.02 of penalty-selection noise. Quote the reader-minus-head
+  difference instead of a score on its own.
 
 ## What is closed, and what is open
 
@@ -180,8 +186,8 @@ Eight alternatives were measured rather than abandoned early, each with a paired
 complex-level bootstrap: ESM-2 650M as an extra block, Pythia-PPI as a block or by output
 averaging, richer inputs from the saved Boltz traces, other Pairformer layers and recycles,
 a nonlinear head, head capacity from 0.1M to 58.4M parameters, combining with Pythia-PPI
-through a learned gate, and distillation from soft labels. None beats the reader by more
-than this cohort can resolve. `RESULTS.md` §5 lists every one with its interval.
+through a learned gate, and distillation from soft labels. None of them beat the reader by more than
+this cohort can resolve. `RESULTS.md` §5 lists every one with its interval.
 
 | route | status |
 |---|---|
@@ -191,10 +197,11 @@ than this cohort can resolve. `RESULTS.md` §5 lists every one with its interval
 | more experimental data | out of reach here: Hummer et al. estimate ≥90,000 measured ΔΔG values are needed for a test Pearson above 0.85. SKEMPI has 5,731 |
 
 Which leaves the representation itself. Everything here is frozen Boltz-2; nothing in this
-work tests what happens when the trunk is allowed to move.
+work tests what happens if the Boltz-2 trunk itself is fine-tuned.
 
 One subset is worth naming separately. Antibody–antigen variants score 0.47 against 0.64
-for the rest, a gap that is not a composition artefact, and our pipeline is handed the
+for the rest, a gap that is not explained by which variants each group happens to contain,
+and our pipeline is handed the
 wild-type crystal structure as a template, so the difficulty is not structural uncertainty.
 The candidate explanation is the representation: antibody CDRs are somatically hypermutated
 and carry little of the evolutionary covariation an MSA-consuming model relies on. That is

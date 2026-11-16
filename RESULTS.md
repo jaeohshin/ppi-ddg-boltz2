@@ -89,10 +89,10 @@ Paired over complexes, 10,000 draws, `wz` against `all` on identical rows and fo
 | `hom99` | not measured | +0.0051 | [−0.0111, +0.0228] |
 | `holdoutprot` | 0% | −0.0040 | [−0.0405, +0.0369] |
 
-**The 294,912 sequence dimensions are worth a significant +0.038 on the leaked split and
-nothing distinguishable from zero on either controlled one.** That is the signature of
-recall, not of representation: they pay when a near neighbour of the test complex is in
-training and not otherwise. It also accounts for most of the `rdenet`-to-`hom99` drop —
+**Removing the 294,912 sequence dimensions costs a significant 0.038 on the leaked split
+and nothing distinguishable from zero on either controlled one.** That is the signature of
+retrieval rather than of representation: those dimensions help when a near neighbour of the
+test complex is present in training, and not otherwise. It also accounts for most of the `rdenet`-to-`hom99` drop —
 0.038 of the reader's 0.053.
 
 Two further readings:
