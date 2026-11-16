@@ -3,11 +3,44 @@
 A linear reader of frozen Boltz-2 representations for protein–protein ΔΔG, and a
 re-examination of the split it is measured on.
 
-**Claim.** The ΔΔG signal the PreFold-dG head exploits is linearly readable from the
-pooled Boltz-2 representations it is given. A ridge with one penalty scale per feature
-block matches the 58.4M-parameter head on the split the field uses, and significantly
-outperforms it once homology is controlled — on identical inputs, the same cohort and the
-same folds. Of the 295,040 numbers it is handed, 128 do the work.
+## What this found
+
+Everything below is measured on identical inputs, the same cohort and the same folds, with
+the 58.4M-parameter head refitted from scratch under every split it is scored on.
+
+**1. The head's 58.4M parameters buy nothing that a linear read of its own input does not
+already have.** A closed-form ridge matches it on the split the field uses
+(+0.015 [−0.023, +0.055]) and beats it once homology is controlled: +0.068 [+0.030, +0.109]
+on `hom99`, +0.055 [+0.021, +0.088] on `holdoutprot`. It also matches the head on the
+published HER2 external test (0.546 [0.483, 0.606] against 0.524) and on the absolute-ΔG
+task — and it never sees HER2 at any point, while the published protocol selects a
+stopping epoch on it.
+
+**2. What looked like the head's advantage was split leakage.** Under control *both* models
+fall — so this is about split strictness in general, not about any one subset — but the head
+falls twice as far, −0.086 against the reader's −0.053. The published numbers reproduce, so
+the performance is real; what does not hold is the attribution. Its source is the Boltz-2
+representation, not the head that reads it.
+
+**3. 128 of the 295,040 numbers do the work, and four dimensions of those 128 are enough.**
+The 294,912 sequence dimensions are worth a significant +0.038 on the leaked split and
+nothing distinguishable from zero on either controlled one — homology recall, not
+representation.
+
+**4. Neither model generalises well to a genuinely new protein family.** Refitted
+leave-one-family-out on the mmCSM-PPI cohort, the ridge falls to 0.555. The advantage under
+control is the reader *degrading less*, not the reader being good. Absolute performance on
+unseen families remains an open problem for both.
+
+**5. So the limit here is split strictness and the representation, not model capacity.**
+Head capacity from 0.1M to 58.4M parameters, a nonlinear head, ESM-2 as an extra block and
+richer inputs from the saved Boltz traces are all closed, each with a paired interval.
+
+This is a property of the field rather than of one paper. The PreFold-dG authors were
+careful by the standards of this literature — they excluded nine HER2-homologous entries by
+Smith-Waterman before their external test, which others using the same test set do not —
+while a survey of this literature found no paper reporting a linear or trivial baseline as a
+control at all. `RESULTS.md` §7 has that reasoning and what follows from it.
 
 ## Where to read what
 
@@ -46,13 +79,14 @@ significant +0.038 on the leaked split and nothing distinguishable from zero on 
 controlled one. Leakage percentages are Bushuiev et al.'s iAlign measurements of these
 splits, not ours.
 
-**Read the controlled rows.** `rdenet` groups by PDB id, which is not enough: at 99% chain
-identity the cohort's 50 antibody–antigen PDB ids collapse to 22 independent clusters, one
-of them fourteen hen-lysozyme complexes. Under control both models fall, so the leakage is
-a property of split strictness in general rather than something specific to antibodies —
-but the head falls twice as far (−0.086 against the reader's −0.053). That is the finding:
-**the leakage was helping the larger model more.** The two controlled splits were built on
-unrelated principles and agree on the gap to within 0.013.
+**Why `rdenet` is not enough.** It groups by PDB id, and at 99% chain identity the
+cohort's 50 antibody–antigen PDB ids collapse to 22 independent clusters, one of them
+fourteen hen-lysozyme complexes: the same antibody sits on both sides of the split while
+the model is being fitted. The two controlled splits were built on unrelated principles —
+ours by clustering chain sequences, the other from the SKEMPI curators' own
+`Hold_out_proteins` column — and agree on the gap to within 0.013, with `holdoutprot` the
+*looser* grouping of the two (159 groups against 127), so the gap is not an artefact of
+over-strict grouping.
 
 The `rdenet` reader entry is a range because two runs of the same procedure on the same
 inputs selected different penalties and landed at 0.604 and 0.626. A single reader score
